@@ -1,0 +1,78 @@
+<p align="center">
+  <img src="apps/web/public/logo-512.png" width="96" alt="KINETRA" />
+</p>
+
+<h1 align="center">KINETRA</h1>
+<p align="center"><b>From Intent to Execution.</b><br/>A terminal AI agent that reads your code, writes the change, runs the commands and asks before anything lands. Releases are notarized on Robinhood Chain.</p>
+
+<p align="center">
+  <a href="https://kinetraagent.tech">kinetraagent.tech</a> ·
+  <a href="https://x.com/KinetraAgent">@KinetraAgent</a> ·
+  <a href="docs/getting-started.md">Docs</a> ·
+  $KNTR
+</p>
+
+## Install
+
+```sh
+curl -fsSL https://kinetraagent.tech/install.sh | sh
+```
+
+The installer reads the latest release from `KinetraReleaseRegistry` on Robinhood Chain, hashes the downloaded package and installs it only when the sha256 matches. Needs Node.js 22 or newer. On Windows, install the tarball from the [latest release](https://github.com/KinetraAgent/kinetra-agent/releases) with `npm install -g <url>`.
+
+```sh
+export ANTHROPIC_API_KEY=sk-ant-...   # or any of the eight providers
+cd your-project
+kinetra
+```
+
+## What it does
+
+| | |
+|---|---|
+| Multi-model, your keys | Anthropic, OpenAI, OpenRouter, Gemini, Groq, DeepSeek, xAI, Ollama and any OpenAI-compatible endpoint |
+| File operations | read, write, exact-match edits, directory listing and regex search, sandboxed to the project |
+| Terminal execution | runs commands in the project root, read-only commands run straight away |
+| Execution approval | `ask`, `edits` or `auto` mode, plus allow-always per session |
+| Coding assistant | generate, explain, review and fix code with a diff preview on every edit |
+| Git integration | `git_diff` before commits, `/diff` in the session |
+| Memory | plain Markdown in `~/.kinetra/memory.md` and `.kinetra/memory.md` |
+| Context | project rules from `KINETRA.md`, environment and memory load into every turn |
+| Sessions | every conversation is saved, `kinetra -c` continues, `kinetra -r <id>` resumes |
+| Tools | eight built-in tools, extensible with `~/.kinetra/tools/*.mjs` |
+
+## Repository
+
+```
+apps/web             landing page, Vue 3 + three.js
+packages/cli         the kinetra CLI, TypeScript, Node 22+
+packages/contracts   KinetraReleaseRegistry and KinetraToolRegistry, UUPS proxies
+deploy               nginx config and deploy scripts
+docs                 guides
+```
+
+```sh
+pnpm install
+pnpm build
+pnpm test
+pnpm dev:web
+```
+
+## Contracts on Robinhood Chain
+
+| Contract | Role |
+|---|---|
+| KinetraReleaseRegistry | sha256 checksum and download URI of every CLI release |
+| KinetraToolRegistry | tool names, manifest URIs and manifest hashes, with a verified flag |
+
+Both are UUPS upgradeable (ERC-1967) and verified on Blockscout. Addresses live in [`packages/contracts/deployments`](packages/contracts/deployments) and on the site. See [docs/contracts.md](docs/contracts.md).
+
+## Roadmap
+
+- **Genesis v1.0**: the execution era. CLI agent, multi-model, approvals, memory, sessions, onchain releases, $KNTR launch with mainnet
+- **Relay v2.0**: connected intelligence. Dashboard, MCP, Telegram, workflows, scheduled tasks, browser automation, multi-agent
+- **Nexus v3.0**: the autonomous economy. Agent marketplace, agent wallets on Robinhood Chain, onchain identity and reputation, autonomous payments
+
+## License
+
+MIT

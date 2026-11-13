@@ -1,0 +1,24 @@
+name: build
+
+on:
+  push:
+    branches: [main, testnet, mainnet]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @kinetra/cli --filter @kinetra/contracts build
+      - run: pnpm --filter @kinetra/cli --filter @kinetra/contracts test
+      - name: Build site
+        run: |
+          if [ -f packages/contracts/deployments/robinhoodTestnet.json ]; then pnpm --filter @kinetra/web build
+          else echo "no testnet deployment yet, site build skipped"; fi
