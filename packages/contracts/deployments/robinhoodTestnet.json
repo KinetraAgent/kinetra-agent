@@ -1,0 +1,74 @@
+{
+  "network": "robinhoodTestnet",
+  "chainId": 46630,
+  "contracts": {
+    "KinetraReleaseRegistry": {
+      "proxy": "0xe2b4fE4EF5d805D3F06F95704c9A3a2f19BA06AF",
+      "implementation": "0x007998b8f1bdea1ab3f5fcf2C837d8b9A13A56e3",
+      "block": 152903125,
+      "verified": true
+    },
+    "KinetraToolRegistry": {
+      "proxy": "0xAFc36c0CFb84404CC50e07425B66c9C2b16bDCB7",
+      "implementation": "0xF516044237Ce7486c17A228688d5A5A069a0a795",
+      "block": 152903164,
+      "verified": true
+    }
+  },
+  "release": {
+    "version": "1.0.0-testnet.1",
+    "checksum": "0x0ce2e2f0b77d7192d437bcb194fafbb6b5ce049564618bbd5c5081b98aa2d09e",
+    "uri": "https://github.com/KinetraAgent/kinetra-agent/releases/download/v1.0.0-testnet.1/kinetra-cli-1.0.0-testnet.1.tgz",
+    "publishedAt": 1794598450
+  },
+  "tools": [
+    {
+      "name": "read_file",
+      "manifestURI": "https://kinetraagent.tech/tools/read_file.json",
+      "manifestHash": "0x50944dbfa734d9d33aa6b724b3ba891422b0596cd280b45a05ebcc6adba2155c",
+      "verified": true
+    },
+    {
+      "name": "write_file",
+      "manifestURI": "https://kinetraagent.tech/tools/write_file.json",
+      "manifestHash": "0xafe3c88798eaf6087b3c944732d628e53e0122ae6f35327104d3515f16118bec",
+      "verified": true
+    },
+    {
+      "name": "edit_file",
+      "manifestURI": "https://kinetraagent.tech/tools/edit_file.json",
+      "manifestHash": "0x3b2ccb8d195f2c8045f0cc99cc3c7327a860084a20d39bfcf05d962fd1cd7490",
+      "verified": true
+    },
+    {
+      "name": "list_dir",
+      "manifestURI": "https://kinetraagent.tech/tools/list_dir.json",
+      "manifestHash": "0x07916b6e34a34f7c04d4814391cc548aa5e9c955553e64eebd832d6052c32f7c",
+      "verified": true
+    },
+    {
+      "name": "search_files",
+      "manifestURI": "https://kinetraagent.tech/tools/search_files.json",
+      "manifestHash": "0x6d5611d8bad3d5f546609c3ccd1d9974466b66832259c85b8358ee198c0b36ce",
+      "verified": true
+    },
+    {
+      "name": "run_command",
+      "manifestURI": "https://kinetraagent.tech/tools/run_command.json",
+      "manifestHash": "0x0ee2947829b63b14f1b264cb3bda6a2ef4bab0758136c67fbc99251699e0e6bd",
+      "verified": true
+    },
+    {
+      "name": "git_diff",
+      "manifestURI": "https://kinetraagent.tech/tools/git_diff.json",
+      "manifestHash": "0x976e1e57b373d45a86a7215c08cf5f6ff984cb6732120a45440a9ca8dc976548",
+      "verified": true
+    },
+    {
+      "name": "remember",
+      "manifestURI": "https://kinetraagent.tech/tools/remember.json",
+      "manifestHash": "0x746adca608fb097a804520e2c7a37a551e342553e4859a7ff776f72f814b49d5",
+      "verified": true
+    }
+  ]
+}

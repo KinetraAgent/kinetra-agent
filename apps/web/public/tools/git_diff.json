@@ -1,0 +1,17 @@
+{
+  "name": "git_diff",
+  "description": "Show uncommitted git changes. Use before committing so the user can review them.",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "staged": {
+        "type": "boolean"
+      },
+      "path": {
+        "type": "string"
+      }
+    }
+  },
+  "approval": "none",
+  "version": "1.0.0-testnet.1"
+}

@@ -1,0 +1,28 @@
+{
+  "name": "edit_file",
+  "description": "Replace an exact, unique snippet of a file. Include enough context to make old_string unique.",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "path": {
+        "type": "string"
+      },
+      "old_string": {
+        "type": "string"
+      },
+      "new_string": {
+        "type": "string"
+      },
+      "replace_all": {
+        "type": "boolean"
+      }
+    },
+    "required": [
+      "path",
+      "old_string",
+      "new_string"
+    ]
+  },
+  "approval": "edit",
+  "version": "1.0.0-testnet.1"
+}

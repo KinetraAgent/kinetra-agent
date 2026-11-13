@@ -1,0 +1,29 @@
+{
+  "name": "search_files",
+  "description": "Search file contents with a regular expression. Returns file:line: text.",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "pattern": {
+        "type": "string",
+        "description": "JavaScript regular expression"
+      },
+      "path": {
+        "type": "string",
+        "description": "Folder to search, default project root"
+      },
+      "glob": {
+        "type": "string",
+        "description": "Only files matching this glob, e.g. src/**/*.ts"
+      },
+      "ignore_case": {
+        "type": "boolean"
+      }
+    },
+    "required": [
+      "pattern"
+    ]
+  },
+  "approval": "none",
+  "version": "1.0.0-testnet.1"
+}

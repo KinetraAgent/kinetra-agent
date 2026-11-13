@@ -1,0 +1,21 @@
+{
+  "name": "run_command",
+  "description": "Run a shell command in the project root and return its exit code and output.",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "command": {
+        "type": "string"
+      },
+      "timeout_seconds": {
+        "type": "integer",
+        "description": "Default 120, max 600"
+      }
+    },
+    "required": [
+      "command"
+    ]
+  },
+  "approval": "exec",
+  "version": "1.0.0-testnet.1"
+}

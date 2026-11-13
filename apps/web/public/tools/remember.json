@@ -1,0 +1,24 @@
+{
+  "name": "remember",
+  "description": "Save a durable fact to memory: project scope for this codebase, global scope for the user's preferences. Memory is loaded in every future session.",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "note": {
+        "type": "string"
+      },
+      "scope": {
+        "type": "string",
+        "enum": [
+          "project",
+          "global"
+        ]
+      }
+    },
+    "required": [
+      "note"
+    ]
+  },
+  "approval": "none",
+  "version": "1.0.0-testnet.1"
+}
