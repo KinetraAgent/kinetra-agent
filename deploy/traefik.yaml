@@ -1,0 +1,24 @@
+# /data/coolify/proxy/dynamic/kinetra.yaml on the VPS
+http:
+  routers:
+    kinetra-http:
+      rule: Host(`kinetraagent.tech`) || Host(`www.kinetraagent.tech`)
+      entryPoints: [http]
+      middlewares: [kinetra-https]
+      service: kinetra-web
+    kinetra-web:
+      rule: Host(`kinetraagent.tech`) || Host(`www.kinetraagent.tech`)
+      entryPoints: [https]
+      service: kinetra-web
+      tls:
+        certResolver: letsencrypt
+  middlewares:
+    kinetra-https:
+      redirectScheme:
+        scheme: https
+        permanent: true
+  services:
+    kinetra-web:
+      loadBalancer:
+        servers:
+          - url: http://host.docker.internal:3901

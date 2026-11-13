@@ -9,6 +9,9 @@ async function main() {
     ? JSON.parse(readFileSync(file, "utf8"))
     : { network: network.name, chainId: network.config.chainId, contracts: {} };
   const [deployer] = await ethers.getSigners();
+  const expected = process.env.DEPLOYER_ADDRESS;
+  if (expected && deployer.address.toLowerCase() !== expected.toLowerCase())
+    throw new Error(`DEPLOYER_PRIVATE_KEY belongs to ${deployer.address}, not DEPLOYER_ADDRESS ${expected}`);
 
   for (const name of NAMES) {
     if (out.contracts[name]) {

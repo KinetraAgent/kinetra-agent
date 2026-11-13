@@ -1,19 +1,15 @@
 #!/bin/sh
-# One-time server setup. Run as root on the VPS: sh setup-vps.sh you@example.com
+# One-time setup on the shared VPS. Traefik (Coolify) already owns ports 80/443,
+# so the site runs as a small nginx container behind it. Run as root on the VPS
+# after deploy.sh has uploaded /opt/kinetra.
 set -eu
-EMAIL="$1"
 
-apt-get update
-apt-get install -y nginx certbot python3-certbot-nginx rsync ufw
-ufw allow OpenSSH
-ufw allow 'Nginx Full'
-ufw --force enable
+docker rm -f kinetra-web 2>/dev/null || true
+docker run -d --name kinetra-web --restart unless-stopped \
+  --memory 64m --cpus 0.5 \
+  -p 172.16.0.1:3901:80 \
+  -v /opt/kinetra/site:/usr/share/nginx/html:ro \
+  -v /opt/kinetra/nginx.conf:/etc/nginx/conf.d/default.conf:ro \
+  nginx:1.29-alpine
 
-mkdir -p /var/www/kinetra
-cp /tmp/kinetra-nginx.conf /etc/nginx/sites-available/kinetra
-ln -sf /etc/nginx/sites-available/kinetra /etc/nginx/sites-enabled/kinetra
-rm -f /etc/nginx/sites-enabled/default
-nginx -t
-systemctl reload nginx
-
-certbot --nginx --non-interactive --agree-tos --redirect -m "$EMAIL" -d kinetraagent.tech -d www.kinetraagent.tech
+cp /opt/kinetra/traefik.yaml /data/coolify/proxy/dynamic/kinetra.yaml
