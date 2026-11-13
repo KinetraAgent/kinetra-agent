@@ -1,0 +1,34 @@
+{
+  "name": "@kinetra/cli",
+  "version": "1.0.0-testnet.1",
+  "description": "KINETRA: the terminal agent that turns intent into execution.",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "kinetra": "dist/cli.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KinetraAgent/kinetra-agent.git",
+    "directory": "packages/cli"
+  },
+  "homepage": "https://kinetraagent.tech",
+  "scripts": {
+    "build": "tsc",
+    "test": "node --test test/*.test.ts",
+    "release": "pnpm build && pnpm pack"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^1.8.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.19.2",
+    "typescript": "^5.9.3"
+  }
+}
