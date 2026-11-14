@@ -41,3 +41,9 @@ pnpm deploy:testnet   # proxies + implementations, writes deployments/robinhoodT
 pnpm seed:testnet     # notarizes the CLI tarball, registers tools, writes install.sh
 pnpm verify:testnet   # verifies source on Blockscout
 ```
+
+Check the live testnet deployment end to end from the repo root:
+
+```sh
+pnpm kinetra-testnet:verify
+```
