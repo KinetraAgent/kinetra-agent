@@ -1,0 +1,20 @@
+{
+  "name": "delegate",
+  "description": "Hand a self-contained subtask to a sub-agent with its own fresh context and the same tools, e.g. research across many files or a separate change. Give it everything it needs; it returns only its final answer. Optional role makes it a specialist, e.g. reviewer or test writer.",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "task": {
+        "type": "string"
+      },
+      "role": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "task"
+    ]
+  },
+  "approval": "none",
+  "version": "2.0.0-testnet.1"
+}

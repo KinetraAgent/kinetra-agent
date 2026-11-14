@@ -16,58 +16,82 @@
     }
   },
   "release": {
-    "version": "1.0.0-testnet.1",
-    "checksum": "0x0ce2e2f0b77d7192d437bcb194fafbb6b5ce049564618bbd5c5081b98aa2d09e",
-    "uri": "https://github.com/KinetraAgent/kinetra-agent/releases/download/v1.0.0-testnet.1/kinetra-cli-1.0.0-testnet.1.tgz",
-    "publishedAt": 1794598450
+    "version": "2.0.0-testnet.1",
+    "checksum": "0xb6984ed74af7394f67b070700187aa3d181f7e2f0a8e36b80623eb63e5564ce2",
+    "uri": "https://github.com/KinetraAgent/kinetra-agent/releases/download/v2.0.0-testnet.1/kinetra-cli-2.0.0-testnet.1.tgz",
+    "publishedAt": 1794688759
   },
   "tools": [
     {
       "name": "read_file",
       "manifestURI": "https://testnet.kinetraagent.tech/tools/read_file.json",
-      "manifestHash": "0x50944dbfa734d9d33aa6b724b3ba891422b0596cd280b45a05ebcc6adba2155c",
+      "manifestHash": "0x854d534273320eeca9e47385e8b4649526ac42759d14ec95001d44e310cc28a1",
       "verified": true
     },
     {
       "name": "write_file",
       "manifestURI": "https://testnet.kinetraagent.tech/tools/write_file.json",
-      "manifestHash": "0xafe3c88798eaf6087b3c944732d628e53e0122ae6f35327104d3515f16118bec",
+      "manifestHash": "0x714548148aa0fe5ba3a9a401f31ded085a82627e2d4dd8911162925b3d4f9943",
       "verified": true
     },
     {
       "name": "edit_file",
       "manifestURI": "https://testnet.kinetraagent.tech/tools/edit_file.json",
-      "manifestHash": "0x3b2ccb8d195f2c8045f0cc99cc3c7327a860084a20d39bfcf05d962fd1cd7490",
+      "manifestHash": "0x8fd36730578938e0984a26e273001b3c631d3855b862d5e0bf45c87e44b69b76",
       "verified": true
     },
     {
       "name": "list_dir",
       "manifestURI": "https://testnet.kinetraagent.tech/tools/list_dir.json",
-      "manifestHash": "0x07916b6e34a34f7c04d4814391cc548aa5e9c955553e64eebd832d6052c32f7c",
+      "manifestHash": "0x79b5552edd6da551fb66a62f033b33803078f39b0575a568b893879f18fcad94",
       "verified": true
     },
     {
       "name": "search_files",
       "manifestURI": "https://testnet.kinetraagent.tech/tools/search_files.json",
-      "manifestHash": "0x6d5611d8bad3d5f546609c3ccd1d9974466b66832259c85b8358ee198c0b36ce",
+      "manifestHash": "0x54b3c420129138b84c24c8efd393d6ceae285ff3624958084c38b202d07eb60b",
       "verified": true
     },
     {
       "name": "run_command",
       "manifestURI": "https://testnet.kinetraagent.tech/tools/run_command.json",
-      "manifestHash": "0x0ee2947829b63b14f1b264cb3bda6a2ef4bab0758136c67fbc99251699e0e6bd",
+      "manifestHash": "0xeec445710d5c5ea9263ab4605cf02cc27df38ba279d1590ef4448cfdd85ea100",
       "verified": true
     },
     {
       "name": "git_diff",
       "manifestURI": "https://testnet.kinetraagent.tech/tools/git_diff.json",
-      "manifestHash": "0x976e1e57b373d45a86a7215c08cf5f6ff984cb6732120a45440a9ca8dc976548",
+      "manifestHash": "0x369ae8f0ae8b0932b483a98a4803f75e03bb44fa53bbba6cd5fe5aafee65bdd6",
       "verified": true
     },
     {
       "name": "remember",
       "manifestURI": "https://testnet.kinetraagent.tech/tools/remember.json",
-      "manifestHash": "0x746adca608fb097a804520e2c7a37a551e342553e4859a7ff776f72f814b49d5",
+      "manifestHash": "0x4ca3a1a6e8f6493f0ec08230019404c2d5be6fc4b47dd31f2a225c52d9b3dd5e",
+      "verified": true
+    },
+    {
+      "name": "recall",
+      "manifestURI": "https://testnet.kinetraagent.tech/tools/recall.json",
+      "manifestHash": "0xc2e61e592c563a3de17747bd0a62358542533dc068eb9bd0b4cf26f27aef716d",
+      "verified": true
+    },
+    {
+      "name": "fetch_url",
+      "manifestURI": "https://testnet.kinetraagent.tech/tools/fetch_url.json",
+      "manifestHash": "0x2d20d2aeb26110bbae06402891c329c18e61483dbadfe958024fa451aedf0c5d",
+      "verified": true
+    },
+    {
+      "name": "github",
+      "manifestURI": "https://testnet.kinetraagent.tech/tools/github.json",
+      "manifestHash": "0x1c90204865992cfceb3c4f772d76529bad52f12958e6e7e377fca72a7dc8018b",
+      "verified": true
+    },
+    {
+      "name": "delegate",
+      "manifestURI": "https://testnet.kinetraagent.tech/tools/delegate.json",
+      "manifestHash": "0xc1fe49ff85407d7de17b50107f3bd7bacc1ddf1d73f9a47f68996d7a1442cc48",
       "verified": true
     }
   ]
