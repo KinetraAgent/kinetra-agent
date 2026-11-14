@@ -1,5 +1,8 @@
 import * as THREE from "three";
 import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
+import { intro, sceneReady } from "./motion";
+import { DISSOLVE_GLSL, glowSprite, starfield, storyParticles } from "./particles";
+import { band, smooth, stageAt } from "./story";
 
 // The KINETRA mark: a thick spherical shell cut into five ribbons along S-shaped seams.
 const R = 1;
@@ -12,11 +15,6 @@ const TOP = new THREE.Color("#46e8ff");
 const MID = new THREE.Color("#2f7bff");
 const LOW = new THREE.Color("#3a3dff");
 const WHITE = new THREE.Color("#ffffff");
-
-const smooth = (a: number, b: number, x: number) => {
-  const t = Math.min(Math.max((x - a) / (b - a), 0), 1);
-  return t * t * (3 - 2 * t);
-};
 
 function shade(y: number, out: THREE.Color) {
   const t = (y + 1) / 2;
@@ -123,7 +121,7 @@ function ribbon(k: number, segPhi: number, segArc: number): THREE.BufferGeometry
 export class KinetraSphere {
   private renderer: THREE.WebGLRenderer;
   private scene = new THREE.Scene();
-  private camera = new THREE.PerspectiveCamera(35, 1, 0.05, 50);
+  private camera = new THREE.PerspectiveCamera(35, 1, 0.05, 80);
   private root = new THREE.Group();
   private core = new THREE.Group();
   private bands: THREE.Mesh<THREE.BufferGeometry, THREE.MeshPhysicalMaterial>[] = [];
@@ -133,15 +131,24 @@ export class KinetraSphere {
   private pointer = new THREE.Vector2(9, 9);
   private rayDirty = false;
   private tilt = new THREE.Vector2();
+  private look = new THREE.Vector2();
+  private hit = new THREE.Vector3();
   private spin = 0;
   private velocity = 0.12;
   private dragging = false;
   private lastX = 0;
+  private moved = 9;
+  private pulse = 0;
   private frame = 0;
   private clock = new THREE.Timer();
   private baseX = 0;
   private baseY = 0;
   private baseScale = 1;
+  private dissolve = { value: 0 };
+  private dust: ReturnType<typeof storyParticles>;
+  private stars: ReturnType<typeof starfield>;
+  private glow = glowSprite();
+  /** Story progress, 0 to 1 over the pinned hero. */
   progress = 0;
 
   constructor(
@@ -151,6 +158,7 @@ export class KinetraSphere {
     const mobile = matchMedia("(max-width: 900px)").matches;
     this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: "high-performance" });
     this.renderer.setPixelRatio(Math.min(devicePixelRatio, mobile ? 1.5 : 1.75));
+    this.renderer.setClearColor(0x000000, 0);
     this.renderer.toneMapping = THREE.NeutralToneMapping;
     this.renderer.toneMappingExposure = 0.95;
 
@@ -176,18 +184,46 @@ export class KinetraSphere {
       side: THREE.DoubleSide,
     });
     for (let k = 0; k < 5; k++) {
-      const mesh = new THREE.Mesh(ribbon(k, mobile ? 96 : 160, mobile ? 18 : 28), material.clone());
+      const m = material.clone();
+      // onBeforeCompile is not carried by clone()
+      m.onBeforeCompile = this.burn;
+      m.customProgramCacheKey = () => "kinetra-burn";
+      const mesh = new THREE.Mesh(ribbon(k, mobile ? 96 : 160, mobile ? 18 : 28), m);
       this.bands.push(mesh);
       this.core.add(mesh);
     }
+    material.dispose();
     this.core.rotation.set(0.28, 0, -0.5);
     this.root.add(this.core);
+
+    this.dust = storyParticles(mobile ? 16000 : 42000, this.bands.map((b) => b.geometry));
+    this.stars = starfield(mobile ? 1200 : 2600);
+    this.root.add(this.dust.points, this.glow);
+    this.scene.add(this.stars.points);
     this.camera.position.set(0, 0, 5);
 
     canvas.addEventListener("pointerdown", this.onDown);
     addEventListener("pointermove", this.onMove, { passive: true });
     addEventListener("pointerup", this.onUp);
   }
+
+  /** Burns the ribbons away along noise with a cyan edge, so the mark breaks into its own particles. */
+  private burn = (shader: Parameters<THREE.Material["onBeforeCompile"]>[0]) => {
+    shader.uniforms.uDissolve = this.dissolve;
+    shader.vertexShader = shader.vertexShader
+      .replace("#include <common>", "#include <common>\nvarying vec3 vObj;")
+      .replace("#include <begin_vertex>", "#include <begin_vertex>\nvObj = position;");
+    shader.fragmentShader = shader.fragmentShader
+      .replace("#include <common>", `#include <common>\nvarying vec3 vObj;\nuniform float uDissolve;\n${DISSOLVE_GLSL}`)
+      .replace(
+        "#include <emissivemap_fragment>",
+        `#include <emissivemap_fragment>
+        float dn = dnoise(vObj * 4.0) * 0.7 + dnoise(vObj * 11.0) * 0.3;
+        float cut = uDissolve * 1.1 - 0.02;
+        if (dn < cut) discard;
+        totalEmissiveRadiance += vec3(0.3, 0.95, 1.0) * (1.0 - smoothstep(0.0, 0.06, dn - cut)) * step(0.001, uDissolve) * 5.0;`,
+      );
+  };
 
   /** Puts the sphere right of the copy on wide screens, above it on narrow ones. */
   resize(width: number, height: number) {
@@ -202,9 +238,12 @@ export class KinetraSphere {
       this.baseScale = Math.min(1.1, halfW * 0.42);
     } else {
       this.baseX = 0;
-      this.baseY = halfH * 0.42;
-      this.baseScale = Math.min(0.78, halfW * 0.62);
+      this.baseY = halfH * 0.5;
+      this.baseScale = Math.min(0.72, halfW * 0.55);
     }
+    const pr = this.renderer.getPixelRatio();
+    this.dust.uniforms.uScaleK.value = (height / 900) * 5 * pr;
+    this.stars.uniforms.uPR.value = pr;
     if (!this.frame) this.render(0);
   }
 
@@ -223,8 +262,14 @@ export class KinetraSphere {
     this.frame = 0;
   }
 
+  /** A shockwave through the particles, and a flinch of the pupil. */
+  kick() {
+    this.pulse = 1;
+  }
+
   private onDown = (e: PointerEvent) => {
     this.dragging = true;
+    this.pulse = 1;
     this.lastX = e.clientX;
     this.canvas.setPointerCapture(e.pointerId);
   };
@@ -234,6 +279,7 @@ export class KinetraSphere {
     this.pointer.set(((e.clientX - rect.left) / rect.width) * 2 - 1, -((e.clientY - rect.top) / rect.height) * 2 + 1);
     this.tilt.set(this.pointer.x, this.pointer.y);
     this.rayDirty = true;
+    this.moved = 0;
     if (this.dragging) {
       this.velocity = (e.clientX - this.lastX) * 0.004;
       this.spin += this.velocity;
@@ -247,6 +293,8 @@ export class KinetraSphere {
 
   private render(dt: number) {
     const p = this.progress;
+    const t = intro.t;
+    const u = this.dust.uniforms;
     if (!this.dragging) {
       // drift back toward a slow idle spin after a flick
       this.velocity += ((this.reduced ? 0 : 0.0025) - this.velocity) * Math.min(dt * 1.5, 1);
@@ -256,31 +304,82 @@ export class KinetraSphere {
     this.core.rotation.x = 0.28 + this.tilt.y * 0.12;
     this.core.rotation.z = -0.5 + this.tilt.x * 0.06;
 
+    this.ray.setFromCamera(this.pointer, this.camera);
     if (this.rayDirty) {
       // raycast only after the pointer moved, not every frame
       this.rayDirty = false;
-      this.ray.setFromCamera(this.pointer, this.camera);
-      const hit = p < 0.2 ? this.ray.intersectObjects(this.bands, false)[0] : undefined;
+      const hit = p < 0.03 && t > 0.99 ? this.ray.intersectObjects(this.bands, false)[0] : undefined;
       this.hovered = hit ? this.bands.indexOf(hit.object as (typeof this.bands)[number]) : -1;
       this.canvas.style.cursor = this.dragging ? "grabbing" : this.hovered >= 0 ? "grab" : "";
     }
 
-    const open = smooth(0.08, 0.6, p);
+    const open = smooth(0, 0.1, p);
+    const center = smooth(0.02, 0.12, p);
+    this.dissolve.value = smooth(0.05, 0.15, p);
     this.bands.forEach((band, k) => {
+      band.visible = this.dissolve.value < 0.999;
       this.lift[k] += ((k === this.hovered ? 1 : 0) - this.lift[k]) * Math.min(dt * 10, 1);
-      const spread = (k - 2) * (open * 0.42);
-      band.position.y = spread;
+      band.position.y = (k - 2) * (open * 0.42);
       band.rotation.y = (k - 2) * open * 0.55;
       band.scale.setScalar(1 + this.lift[k] * 0.035);
       band.material.emissive.setRGB(0.02, 0.18, 0.32).multiplyScalar(this.lift[k]);
     });
 
-    const dive = smooth(0.45, 1, p);
-    this.root.position.set(this.baseX * (1 - dive), this.baseY * (1 - dive), 0);
-    this.root.scale.setScalar(this.baseScale);
-    this.camera.position.set(0, 0, 5 - dive * 4.6);
+    // the splash shows the mark centred and small; it settles into place as the page opens
+    this.root.position.set(this.baseX * t * (1 - center), this.baseY * t * (1 - center), 0);
+    this.root.scale.setScalar(this.baseScale * (0.62 + 0.38 * t));
+    this.camera.position.set(this.look.x * 0.1, this.look.y * 0.06, 5);
     this.camera.lookAt(0, 0, 0);
+
+    this.core.updateMatrix();
+    u.uLogoM.value.copy(this.core.matrix);
+    u.uTime.value += dt;
+    u.uStage.value = stageAt(p);
+    u.uOpen.value = open;
+    u.uLogoScale.value = 1 + smooth(0.08, 0.2, p) * 2.6;
+    u.uLogoAlpha.value = smooth(0.04, 0.11, p);
+    u.uHalo.value = 1 + smooth(0.26, 0.34, p) * 1.6;
+    u.uFlow.value += dt * (0.4 + 7 * band(0.26, 0.32, 0.38, 0.44, p));
+    u.uBloomOpen.value = smooth(0.55, 0.64, p);
+    u.uBloomY.value = -1.6 + 1.4 * smooth(0.48, 0.58, p);
+    u.uScatter.value = smooth(0.68, 0.8, p);
+    this.pulse = Math.max(this.pulse - dt * 2.2, 0);
+    // the pupil flinches on click and opens wide at the end to let the page through
+    u.uPupil.value = 0.36 - this.pulse * 0.12 + smooth(0.94, 1, p) * 3;
+    this.look.lerp(this.tilt, Math.min(dt * 4, 1));
+    u.uLook.value.copy(this.look);
+    this.moved += dt;
+    u.uMouseK.value += ((this.moved < 0.25 ? 1 : 0.3) + this.pulse * 4 - u.uMouseK.value) * Math.min(dt * 6, 1);
+    this.dust.points.visible = p > 0.03;
+
+    // the cursor where it meets the z = 0 plane, in the particles' own space
+    const { origin, direction } = this.ray.ray;
+    this.hit
+      .copy(origin)
+      .addScaledVector(direction, -origin.z / direction.z)
+      .sub(this.root.position)
+      .divideScalar(this.root.scale.x);
+    u.uMouse.value.copy(this.hit);
+
+    const core = band(0.12, 0.2, 0.3, 0.42, p);
+    const flash = band(0.28, 0.36, 0.38, 0.44, p);
+    const bud = band(0.5, 0.57, 0.68, 0.76, p);
+    const light = this.glow.material;
+    light.opacity = Math.max(core * 0.9, flash, bud * 0.85);
+    light.color.setRGB(1 - bud * 0.25, 0.84 + bud * 0.12, 0.56 + bud * 0.44);
+    this.glow.scale.setScalar(1.1 + flash * 9 + bud * 0.3);
+    this.glow.position.y = bud > core ? u.uBloomY.value + 0.12 : 0;
+    this.glow.visible = light.opacity > 0.01;
+
+    this.stars.uniforms.uTime.value = u.uTime.value;
+    this.stars.uniforms.uAlpha.value = (1 - 0.6 * smooth(0.4, 0.5, p)) * (1 - smooth(0.9, 0.99, p));
+    this.stars.points.rotation.set(this.look.y * 0.03, u.uTime.value * 0.004 + this.look.x * 0.05, 0);
+
     this.renderer.render(this.scene, this.camera);
+    if (!sceneShown) {
+      sceneShown = true;
+      sceneReady.resolve();
+    }
   }
 
   dispose() {
@@ -292,7 +391,15 @@ export class KinetraSphere {
       b.geometry.dispose();
       b.material.dispose();
     });
+    for (const o of [this.dust.points, this.stars.points]) {
+      o.geometry.dispose();
+      (o.material as THREE.Material).dispose();
+    }
+    this.glow.material.map?.dispose();
+    this.glow.material.dispose();
     this.scene.environment?.dispose();
     this.renderer.dispose();
   }
 }
+
+let sceneShown = false;

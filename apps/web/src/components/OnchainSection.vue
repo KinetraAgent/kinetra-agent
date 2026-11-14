@@ -3,6 +3,7 @@ import { BadgeCheck, Check, Copy, ExternalLink } from "lucide-vue-next";
 import { computed, ref } from "vue";
 import { CHAIN_NAME, CONTRACTS, EXPLORER, fmt, live, short } from "../lib/chain";
 import { useCopy } from "../lib/copy";
+import RollingNumber from "./RollingNumber.vue";
 import TxChart from "./TxChart.vue";
 
 const { copy } = useCopy();
@@ -29,7 +30,7 @@ const tarball = computed(() => live.release?.uri.split("/").pop() ?? "");
 <template>
   <section id="onchain" class="section onchain">
     <div class="wrap">
-      <div class="section-head reveal">
+      <div class="section-head reveal" data-n="03">
         <div>
           <p class="kicker mono"><b>03</b> onchain · {{ CHAIN_NAME }}</p>
           <h2 class="h2">Every release, notarized on Robinhood Chain</h2>
@@ -41,7 +42,7 @@ const tarball = computed(() => live.release?.uri.split("/").pop() ?? "");
       </div>
 
       <div class="grid">
-        <article class="card pane chart-pane reveal">
+        <article class="card pane chart-pane reveal" data-tilt="2">
           <header class="pane-head">
             <div>
               <p class="label">Daily transactions on {{ CHAIN_NAME }}</p>
@@ -55,7 +56,7 @@ const tarball = computed(() => live.release?.uri.split("/").pop() ?? "");
           <div v-else class="chart-wait" aria-hidden="true"></div>
         </article>
 
-        <article class="card pane verify reveal" data-delay="0.05">
+        <article class="card pane verify reveal" data-delay="0.05" data-tilt="3">
           <p class="label">How an install is verified</p>
           <ol>
             <li>
@@ -97,7 +98,7 @@ const tarball = computed(() => live.release?.uri.split("/").pop() ?? "");
           <p class="label">Smart contracts</p>
           <span class="meta mono">
             <span class="dot"></span>
-            <template v-if="live.block">block #{{ fmt(live.block) }}</template>
+            <template v-if="live.block">block #<RollingNumber :value="fmt(live.block)" /></template>
             <span v-else class="skeleton"></span>
           </span>
         </header>
@@ -138,7 +139,6 @@ const tarball = computed(() => live.release?.uri.split("/").pop() ?? "");
 
 <style scoped>
 .onchain {
-  background: var(--bg);
   border-top: 1px solid var(--line);
 }
 .grid {
@@ -181,6 +181,15 @@ const tarball = computed(() => live.release?.uri.split("/").pop() ?? "");
 }
 .change.up {
   color: var(--pos);
+}
+.meta .dot {
+  box-shadow: 0 0 10px var(--pos);
+  animation: blink 2.5s steps(1) infinite;
+}
+@keyframes blink {
+  50% {
+    opacity: 0.35;
+  }
 }
 .meta {
   display: inline-flex;
@@ -238,6 +247,12 @@ ol p {
 }
 .contracts {
   padding: 24px;
+}
+.tr:not(.th) {
+  transition: background-color var(--fast) var(--ease);
+}
+.tr:not(.th):hover {
+  background: linear-gradient(90deg, var(--accent-soft), transparent 70%);
 }
 .tr {
   display: grid;

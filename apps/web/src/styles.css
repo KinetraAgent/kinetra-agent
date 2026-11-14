@@ -1,4 +1,4 @@
-@import "@fontsource-variable/bricolage-grotesque";
+@import "@fontsource-variable/bricolage-grotesque/standard.css";
 @import "@fontsource-variable/jetbrains-mono";
 
 :root {
@@ -10,7 +10,17 @@
   --font-sans: "Bricolage Grotesque Variable", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono Variable", ui-monospace, "SFMono-Regular", monospace;
 
-  /* ink ramp, dark is the default theme */
+  --r-key: 6px;
+  --r-ctl: 10px;
+  --r-card: 16px;
+  --r-panel: 20px;
+  --page: 1280px;
+  --gutter: 32px;
+}
+
+/* ink ramp, dark is the default theme; any element can force a theme for its subtree */
+:root,
+[data-theme="dark"] {
   --bg-deep: #07080d;
   --bg: #0b0d14;
   --card: #11141c;
@@ -31,13 +41,8 @@
   --pos: #4cc38a;
   --neg: #e5484d;
   --warn: #f2b84b;
-
-  --r-key: 6px;
-  --r-ctl: 10px;
-  --r-card: 16px;
-  --r-panel: 20px;
-  --page: 1280px;
-  --gutter: 32px;
+  --glow: rgb(34 225 245 / 0.45);
+  --card-hi: rgb(255 255 255 / 0.05);
 
   color-scheme: dark;
 }
@@ -61,7 +66,13 @@
   --pos: #16a34a;
   --neg: #dc2626;
   --warn: #b7791f;
+  --glow: rgb(10 92 240 / 0.28);
+  --card-hi: rgb(255 255 255 / 0.9);
   color-scheme: light;
+}
+
+[data-theme] {
+  color: var(--text);
 }
 
 *,
@@ -74,6 +85,11 @@ html {
   -webkit-text-size-adjust: 100%;
 }
 
+html.locked,
+html.locked body {
+  overflow: hidden;
+}
+
 html.lenis,
 html.lenis body {
   height: auto;
@@ -81,6 +97,43 @@ html.lenis body {
 
 .lenis.lenis-smooth {
   scroll-behavior: auto !important;
+}
+
+main {
+  position: relative;
+  z-index: 1;
+}
+
+/* film grain over everything, below the splash and the cursor */
+body::after {
+  content: "";
+  position: fixed;
+  inset: -50%;
+  z-index: 90;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity: 0.06;
+  animation: grain 900ms steps(5) infinite;
+}
+[data-theme="light"] body::after {
+  opacity: 0.035;
+}
+@keyframes grain {
+  0% {
+    transform: translate(0, 0);
+  }
+  20% {
+    transform: translate(-4%, 3%);
+  }
+  40% {
+    transform: translate(3%, -5%);
+  }
+  60% {
+    transform: translate(-6%, -2%);
+  }
+  80% {
+    transform: translate(5%, 4%);
+  }
 }
 
 body {
@@ -136,6 +189,7 @@ button {
 }
 
 .section-head {
+  position: relative;
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 420px);
   gap: 32px;
@@ -153,17 +207,71 @@ button {
   margin-bottom: 16px;
 }
 
+.kicker::before {
+  content: "";
+  width: 28px;
+  height: 1px;
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent);
+}
 .kicker b {
   color: var(--accent);
   font-weight: 500;
 }
+.section-head[data-n]::after {
+  content: attr(data-n);
+  position: absolute;
+  right: -0.04em;
+  top: -0.42em;
+  z-index: -1;
+  font-size: clamp(140px, 22vw, 320px);
+  font-stretch: 75%;
+  font-weight: 700;
+  line-height: 1;
+  color: transparent;
+  -webkit-text-stroke: 1px var(--line-2);
+  pointer-events: none;
+}
+
+.display {
+  font-stretch: 75%;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
+}
+
+/* decoding text: every character keeps its width while it shows noise */
+.word {
+  display: inline-block;
+  white-space: nowrap;
+}
+.ch {
+  position: relative;
+}
+.ch[data-s="off"] {
+  opacity: 0;
+}
+.ch[data-s="noise"] {
+  color: transparent;
+  text-shadow: none;
+}
+.ch[data-s="noise"]::after {
+  content: attr(data-g);
+  position: absolute;
+  left: 0;
+  top: 0;
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-weight: 400;
+  font-stretch: 100%;
+}
 
 .h2 {
   text-wrap: balance;
-  font-size: clamp(36px, 5vw, 56px);
-  line-height: 1.04;
+  font-size: clamp(40px, 6vw, 76px);
+  line-height: 0.98;
   font-weight: 500;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.03em;
   margin: 0;
 }
 
@@ -175,9 +283,44 @@ button {
 }
 
 .card {
-  background: var(--card);
+  position: relative;
+  isolation: isolate;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--card) 94%, transparent), color-mix(in srgb, var(--card) 82%, transparent));
   border: 1px solid var(--line);
   border-radius: var(--r-card);
+  box-shadow: inset 0 1px 0 var(--card-hi);
+}
+.card::before,
+.card::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--slow) var(--ease);
+}
+.card::before {
+  z-index: 2;
+  padding: 1px;
+  background: radial-gradient(260px circle at var(--mx, -999px) var(--my, -999px), var(--accent), transparent 70%);
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+.card::after {
+  z-index: -1;
+  background: radial-gradient(420px circle at var(--mx, -999px) var(--my, -999px), var(--accent-soft), transparent 65%);
+}
+.card:hover::before,
+.card:hover::after {
+  opacity: 1;
+}
+[data-tilt] {
+  transform-style: preserve-3d;
+  will-change: transform;
 }
 
 .btn {
@@ -211,7 +354,9 @@ button {
   background: var(--accent);
   border-color: transparent;
   color: var(--accent-ink);
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.24);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.24),
+    0 0 32px -6px var(--glow);
 }
 
 .btn.primary:hover {
@@ -228,7 +373,24 @@ button {
 
 .reveal {
   opacity: 0;
-  transform: translateY(12px);
+}
+
+/* one faint light per section, alternating sides */
+.section::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  top: 0;
+  right: -10%;
+  width: 60%;
+  height: 70%;
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--accent) 8%, transparent), transparent);
+  pointer-events: none;
+}
+.section:nth-of-type(even)::before {
+  right: auto;
+  left: -10%;
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--blue) 9%, transparent), transparent);
 }
 
 .skeleton {
@@ -271,7 +433,9 @@ button {
   }
   .reveal {
     opacity: 1;
-    transform: none;
+  }
+  body::after {
+    animation: none;
   }
 }
 

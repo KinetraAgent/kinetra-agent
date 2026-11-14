@@ -185,7 +185,7 @@ const seconds = computed(() => (stats.elapsed / 1000).toFixed(1));
 <template>
   <section id="arcade" ref="root" class="section arcade">
     <div class="wrap">
-      <div class="section-head reveal">
+      <div class="section-head reveal" data-n="01">
         <div>
           <p class="kicker mono"><b>01</b> execution arcade</p>
           <h2 class="h2">Give it an intent. <br />You hold the keys.</h2>
@@ -197,7 +197,7 @@ const seconds = computed(() => (stats.elapsed / 1000).toFixed(1));
       </div>
 
       <div class="grid reveal">
-        <div class="term card">
+        <div class="term card" :class="{ awaiting: !!pending }">
           <div class="term-bar mono">
             <span class="path">kinetra · ~/acme-app</span>
             <div class="modes" role="radiogroup" aria-label="Approval mode">
@@ -244,9 +244,9 @@ const seconds = computed(() => (stats.elapsed / 1000).toFixed(1));
                 <pre v-else class="diff"><span class="ctx">$ {{ l.arg }}</span></pre>
                 <div v-if="!l.answer" class="keys">
                   <span class="faint">allow?</span>
-                  <Keycap label="Y" tone="accent" :pressed="pressed === 'yes'" @click="answer('yes')">Y <span>yes</span></Keycap>
-                  <Keycap label="N" tone="neg" :pressed="pressed === 'no'" @click="answer('no')">N <span>no</span></Keycap>
-                  <Keycap label="A" :pressed="pressed === 'always'" @click="answer('always')">A <span>always</span></Keycap>
+                  <Keycap label="Y" tone="accent" :pressed="pressed === 'yes'" data-cursor="allow" @click="answer('yes')">Y <span>yes</span></Keycap>
+                  <Keycap label="N" tone="neg" :pressed="pressed === 'no'" data-cursor="deny" @click="answer('no')">N <span>no</span></Keycap>
+                  <Keycap label="A" :pressed="pressed === 'always'" data-cursor="always" @click="answer('always')">A <span>always</span></Keycap>
                 </div>
                 <p v-else class="faint">{{ l.answer === "no" ? "declined" : l.answer === "always" ? "allowed for this session" : "allowed" }}</p>
               </div>
@@ -270,6 +270,7 @@ const seconds = computed(() => (stats.elapsed / 1000).toFixed(1));
               v-for="(m, i) in MISSIONS"
               :key="m.id"
               type="button"
+              data-cursor="play"
               class="mission"
               :class="{ done: cleared.has(m.id) }"
               :disabled="running"
@@ -318,7 +319,7 @@ const seconds = computed(() => (stats.elapsed / 1000).toFixed(1));
 
 <style scoped>
 .arcade {
-  background: var(--bg);
+  padding-top: 72px;
 }
 kbd {
   padding: 1px 6px;
@@ -340,7 +341,40 @@ kbd {
   height: 600px;
   overflow: hidden;
   border-radius: var(--r-panel);
-  background: var(--bg-deep);
+  background:
+    radial-gradient(120% 60% at 50% 0%, var(--accent-soft), transparent 60%),
+    color-mix(in srgb, var(--bg-deep) 92%, transparent);
+  box-shadow:
+    0 40px 80px -40px rgb(0 0 0 / 0.6),
+    inset 0 1px 0 var(--card-hi);
+  transition:
+    border-color var(--slow) var(--ease),
+    box-shadow var(--slow) var(--ease);
+}
+/* scanline sheen that sweeps the screen now and then */
+.term::after {
+  opacity: 1;
+  z-index: 3;
+  background: linear-gradient(180deg, transparent 0%, var(--accent-soft) 50%, transparent 100%);
+  background-size: 100% 220px;
+  background-repeat: no-repeat;
+  animation: sweep 7s linear infinite;
+}
+@keyframes sweep {
+  from {
+    background-position: 0 -220px;
+  }
+  to {
+    background-position: 0 calc(100% + 220px);
+  }
+}
+/* waiting on the visitor: the frame lights up in the accent */
+.term.awaiting {
+  border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--accent) 30%, transparent),
+    0 0 60px -10px var(--glow),
+    0 40px 80px -40px rgb(0 0 0 / 0.6);
 }
 .term-bar {
   display: flex;

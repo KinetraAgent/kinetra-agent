@@ -18,8 +18,11 @@ const STEPS = [
   <section id="install" class="section install">
     <div class="wrap grid">
       <div class="reveal">
+        <svg class="key" viewBox="0 0 120 170" aria-hidden="true" data-speed="-0.25">
+          <path d="M60 6a40 40 0 0 1 22 73.4L96 164H24l14-84.6A40 40 0 0 1 60 6Z" />
+        </svg>
         <p class="kicker mono"><b>05</b> install</p>
-        <h2 class="h2">One line to your first execution</h2>
+        <h2 class="h2">One line to your first <em>execution</em></h2>
         <p class="lede">Needs Node.js 22 or newer. The script verifies the package against Robinhood Chain before it installs.</p>
         <a class="repo card" :href="GITHUB" target="_blank" rel="noopener">
           <BrandIcon name="github" />
@@ -52,8 +55,31 @@ const STEPS = [
 
 <style scoped>
 .install {
-  background: var(--bg);
   border-top: 1px solid var(--line);
+  overflow: hidden;
+}
+.grid > .reveal {
+  position: relative;
+}
+/* the splash keyhole again, closing the loop: the key is yours */
+.key {
+  position: absolute;
+  left: -56px;
+  top: -24px;
+  z-index: -1;
+  width: 300px;
+  fill: none;
+  stroke: color-mix(in srgb, var(--accent) 40%, transparent);
+  stroke-width: 0.4;
+  filter: drop-shadow(0 0 18px var(--glow));
+  pointer-events: none;
+}
+.h2 em {
+  font-style: normal;
+  color: var(--accent);
+}
+.panel {
+  box-shadow: 0 0 80px -30px var(--glow);
 }
 .grid {
   display: grid;

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Check, Lock } from "lucide-vue-next";
 import { ref } from "vue";
+import { X_URL } from "../lib/links";
 
 const LEVELS = [
   {
@@ -10,20 +11,19 @@ const LEVELS = [
     era: "The Execution Era",
     status: "testnet live",
     features: [
-      "KINETRA CLI agent",
-      "Multi-model support, bring your own key",
-      "File operations",
-      "Terminal execution with approval",
-      "AI coding assistant",
-      "Persistent Markdown memory",
-      "Session history and resume",
-      "Execution approval modes",
-      "Git diff before commits",
-      "Project context with KINETRA.md",
-      "Extensible tool system",
-      "Open-source repository",
-      "Landing page and docs",
-      "$KNTR launch with mainnet",
+      { t: "KINETRA CLI Agent", d: "A lightweight terminal-based AI agent that understands and executes user instructions." },
+      { t: "Multi-Model Support", d: "Connect multiple AI model providers using your own API keys (BYOK)." },
+      { t: "File Operations", d: "Read, create, search and modify files within designated project directories." },
+      { t: "Terminal Execution", d: "Execute shell commands with user approval for sensitive operations." },
+      { t: "AI Coding Assistant", d: "Generate, explain, review, debug and modify source code." },
+      { t: "Persistent Memory", d: "Store and retrieve local agent memory in editable Markdown or text files." },
+      { t: "Session History", d: "Save conversations and resume previous tasks." },
+      { t: "Execution Approval", d: "Require user confirmation before sensitive commands and file modifications." },
+      { t: "Git Integration", d: "Inspect code changes through Git diffs before committing modifications." },
+      { t: "Context Management", d: "Maintain project-specific instructions and relevant development context." },
+      { t: "Basic Tool System", d: "Support extensible tools for additional agent capabilities." },
+      { t: "Open-Source Repository", d: "The core agent implementation and basic setup documentation, published." },
+      { t: "Minimal Landing Page", d: "Introduces KINETRA, its capabilities, installation instructions and documentation." },
     ],
   },
   {
@@ -33,18 +33,18 @@ const LEVELS = [
     era: "Connected Intelligence",
     status: "unlocks after Genesis",
     features: [
-      "Web dashboard for sessions and history",
-      "MCP integration",
-      "Telegram control",
-      "Reusable workflows",
-      "Scheduled tasks",
-      "Browser automation",
-      "Multi-agent coordination",
-      "Structured project memory",
-      "GitHub integration",
-      "Usage analytics",
-      "Community tool ecosystem",
-      "$KNTR access to premium services",
+      { t: "Web Dashboard", d: "Manage agent sessions, tasks, settings and execution history." },
+      { t: "MCP Integration", d: "Connect external tools and services through Model Context Protocol." },
+      { t: "Telegram Integration", d: "Interact with KINETRA agents remotely through Telegram." },
+      { t: "Workflow Automation", d: "Create and execute reusable automated workflows." },
+      { t: "Scheduled Tasks", d: "Run recurring tasks without manually starting each execution." },
+      { t: "Browser Automation", d: "Let agents navigate websites and perform browser-based operations." },
+      { t: "Multi-Agent Coordination", d: "Delegate complex tasks to multiple specialized agents." },
+      { t: "Advanced Memory", d: "Structured project memory and improved context retrieval." },
+      { t: "GitHub Integration", d: "Connect repositories and automate selected development workflows." },
+      { t: "Usage Analytics", d: "Monitor model consumption, execution history and task performance." },
+      { t: "Extended Tool Ecosystem", d: "Support community-developed tools and integrations." },
+      { t: "$KNTR Utility Expansion", d: "Explore token-based access to selected premium services and platform capabilities." },
     ],
   },
   {
@@ -54,18 +54,18 @@ const LEVELS = [
     era: "The Autonomous Economy",
     status: "unlocks after Relay",
     features: [
-      "Agent marketplace",
-      "Agent-to-agent communication",
-      "Agent service marketplace",
-      "Smart agent wallets on Robinhood Chain",
-      "Spending limits and transaction approvals",
-      "Onchain agent identity",
-      "Agent reputation",
-      "Autonomous payments",
-      "KINETRA Cloud for persistent agents",
-      "Developer SDK",
-      "Agent economy",
-      "$KNTR payments across the ecosystem",
+      { t: "KINETRA Agent Marketplace", d: "Discover, publish and access specialized AI agents." },
+      { t: "Agent-to-Agent Communication", d: "Autonomous agents collaborate and delegate tasks to each other." },
+      { t: "Agent Service Marketplace", d: "Developers offer specialized agent capabilities." },
+      { t: "Smart Wallet Integration", d: "Programmable agent wallets on Robinhood Chain." },
+      { t: "Permission-Based Transactions", d: "Spending limits and transaction approvals for autonomous agents." },
+      { t: "Onchain Agent Identity", d: "Verifiable blockchain-based identities for agents." },
+      { t: "Agent Reputation System", d: "Track service history, reliability and community contributions." },
+      { t: "Autonomous Payments", d: "Agents pay for approved digital services and resources." },
+      { t: "KINETRA Cloud", d: "Run persistent agents and background workflows without a local machine." },
+      { t: "Developer SDK", d: "External developers build applications and integrations on KINETRA infrastructure." },
+      { t: "Agent Economy", d: "An ecosystem where agents discover, access and pay for external services." },
+      { t: "$KNTR Ecosystem Utility", d: "Token-based payments for supported marketplace services and ecosystem participation." },
     ],
   },
 ];
@@ -75,7 +75,7 @@ const selected = ref(LEVELS[0]);
 <template>
   <section id="roadmap" class="section roadmap">
     <div class="wrap">
-      <div class="section-head reveal">
+      <div class="section-head reveal" data-n="04">
         <div>
           <p class="kicker mono"><b>04</b> roadmap</p>
           <h2 class="h2">Three levels. Genesis is in play.</h2>
@@ -96,6 +96,7 @@ const selected = ref(LEVELS[0]);
             class="level"
             :class="{ on: selected.n === l.n, current: l.n === 1 }"
             :aria-selected="selected.n === l.n"
+            data-tilt="6"
             @click="selected = l"
           >
             <span class="lv mono">level {{ l.n }}</span>
@@ -118,9 +119,12 @@ const selected = ref(LEVELS[0]);
             </div>
           </header>
           <ul :key="selected.n" class="features">
-            <li v-for="(f, i) in selected.features" :key="f" :style="{ '--i': i }">
+            <li v-for="(f, i) in selected.features" :key="f.t" :style="{ '--i': i }">
               <span class="mono idx">{{ String(i + 1).padStart(2, "0") }}</span>
-              {{ f }}
+              <span>
+                <b>{{ f.t }}</b>
+                <span class="fd">{{ f.d }}</span>
+              </span>
             </li>
           </ul>
         </div>
@@ -129,20 +133,27 @@ const selected = ref(LEVELS[0]);
       <div id="token" class="token card reveal">
         <div class="ticker">
           <p class="sym mono">$KNTR</p>
-          <p class="desc">Launches with KINETRA V1.0 on Robinhood Chain. It grows into the currency agents use to pay for work.</p>
+          <p class="desc">
+            Launched independently by the project owner through an external token launch platform, scheduled alongside the KINETRA
+            mainnet release. Token deployment and liquidity are handled separately from KINETRA software development.
+          </p>
+          <p class="official mono">
+            Contract address only through official KINETRA channels:
+            <a :href="X_URL" target="_blank" rel="noopener">X @KinetraAgent</a>
+          </p>
         </div>
         <ol class="utility">
           <li>
             <span class="mono">Genesis</span>
-            <p>Token launch alongside the V1.0 mainnet release</p>
+            <p>Independent token launch alongside the v1.0 mainnet release</p>
           </li>
           <li>
             <span class="mono">Relay</span>
-            <p>Access to premium services and platform capabilities</p>
+            <p>Exploring token-based access to selected premium services and platform capabilities</p>
           </li>
           <li>
             <span class="mono">Nexus</span>
-            <p>Payments for marketplace services and ecosystem participation</p>
+            <p>Token-based payments for supported marketplace services and ecosystem participation</p>
           </li>
         </ol>
       </div>
@@ -152,7 +163,7 @@ const selected = ref(LEVELS[0]);
 
 <style scoped>
 .roadmap {
-  background: var(--bg-deep);
+  border-top: 1px solid var(--line);
 }
 .levels {
   display: grid;
@@ -188,7 +199,8 @@ const selected = ref(LEVELS[0]);
 .level.on {
   border-color: var(--line-2);
   border-bottom-color: var(--accent);
-  background: var(--raised);
+  background: linear-gradient(180deg, var(--raised), color-mix(in srgb, var(--accent) 8%, var(--raised)));
+  box-shadow: 0 18px 40px -24px var(--glow);
 }
 .lv,
 .status {
@@ -251,7 +263,17 @@ const selected = ref(LEVELS[0]);
   display: block;
   width: 60%;
   height: 100%;
-  background: var(--accent);
+  background: linear-gradient(90deg, var(--blue), var(--accent));
+  box-shadow: 0 0 10px var(--accent);
+  animation: charge 2.4s var(--ease) infinite alternate;
+}
+@keyframes charge {
+  from {
+    width: 48%;
+  }
+  to {
+    width: 64%;
+  }
 }
 .features {
   list-style: none;
@@ -265,7 +287,7 @@ const selected = ref(LEVELS[0]);
   display: flex;
   gap: 12px;
   align-items: baseline;
-  padding: 10px 0;
+  padding: 12px 0;
   border-top: 1px solid var(--line);
   font-size: 14px;
   animation: rise var(--slow) var(--ease) both;
@@ -290,13 +312,36 @@ const selected = ref(LEVELS[0]);
 }
 .sym {
   margin: 0 0 12px;
-  font-size: 40px;
-  line-height: 1;
+  font-size: clamp(56px, 7vw, 88px);
+  font-family: var(--font-sans);
+  font-stretch: 75%;
+  font-weight: 600;
+  line-height: 0.9;
   color: var(--accent);
+  text-shadow: 0 0 40px var(--glow);
 }
 .ticker .desc {
   margin: 0;
   color: var(--text-2);
+}
+.features b {
+  display: block;
+  font-weight: 500;
+}
+.fd {
+  display: block;
+  margin-top: 2px;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--muted);
+}
+.official {
+  margin: 16px 0 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+.official a {
+  color: var(--accent);
 }
 .utility {
   list-style: none;

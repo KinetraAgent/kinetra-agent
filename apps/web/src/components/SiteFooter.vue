@@ -1,6 +1,23 @@
 <script setup lang="ts">
+import { ref } from "vue";
 import { CHAIN_NAME, EXPLORER, CONTRACTS } from "../lib/chain";
-import { GITHUB, X_URL } from "../lib/links";
+import { GITHUB, SITE, X_URL } from "../lib/links";
+import { finePointer, reduced } from "../lib/motion";
+
+// The wordmark leans toward the cursor: letters near it grow heavier and wider on the font's own axes.
+const mark = ref<HTMLElement>();
+function flex(e: PointerEvent) {
+  if (!finePointer || reduced) return;
+  for (const el of mark.value!.children as HTMLCollectionOf<HTMLElement>) {
+    const r = el.getBoundingClientRect();
+    const d = (e.clientX - (r.left + r.width / 2)) / innerWidth;
+    const f = Math.exp(-(d * d) / 0.006);
+    el.style.fontVariationSettings = `"wght" ${Math.round(200 + 600 * f)}, "wdth" ${Math.round(75 + 25 * f)}`;
+  }
+}
+function rest() {
+  for (const el of mark.value!.children as HTMLCollectionOf<HTMLElement>) el.style.fontVariationSettings = "";
+}
 </script>
 
 <template>
@@ -30,18 +47,43 @@ import { GITHUB, X_URL } from "../lib/links";
         <a :href="`${GITHUB}/issues`" target="_blank" rel="noopener">Issues</a>
       </nav>
     </div>
+    <div class="mark" ref="mark" aria-hidden="true" @pointermove="flex" @pointerleave="rest">
+      <span v-for="(c, i) in 'KINETRA'" :key="i">{{ c }}</span>
+    </div>
     <div class="wrap base mono">
       <span>© 2026 KINETRA</span>
-      <span>built on {{ CHAIN_NAME }}</span>
+      <span>{{ SITE.replace("https://", "") }} · built on {{ CHAIN_NAME }}</span>
     </div>
   </footer>
 </template>
 
 <style scoped>
 .footer {
-  background: var(--bg-deep);
+  position: relative;
+  z-index: 1;
+  overflow: hidden;
+  background: linear-gradient(180deg, transparent, var(--bg-deep) 40%);
   border-top: 1px solid var(--line);
   padding: 64px 0 32px;
+}
+.mark {
+  display: flex;
+  justify-content: center;
+  margin: 56px 0 -0.12em;
+  font-size: 23vw;
+  line-height: 0.8;
+  font-weight: 200;
+  font-variation-settings: "wght" 200, "wdth" 75;
+  letter-spacing: -0.02em;
+  color: transparent;
+  -webkit-text-stroke: 1px color-mix(in srgb, var(--accent) 60%, transparent);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 22%, transparent), transparent 85%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  user-select: none;
+}
+.mark span {
+  transition: font-variation-settings 500ms var(--ease);
 }
 .grid {
   display: grid;
@@ -85,7 +127,7 @@ nav a:hover {
 .base {
   display: flex;
   justify-content: space-between;
-  margin-top: 48px;
+  gap: 16px;
   padding-top: 24px;
   border-top: 1px solid var(--line);
   font-size: 12px;

@@ -88,7 +88,7 @@ const DEFAULT_MEMORY = ["uses pnpm, never npm", "tests sit next to source as *.t
 <template>
   <section id="toolkit" class="section toolkit">
     <div class="wrap">
-      <div class="section-head reveal">
+      <div class="section-head reveal" data-n="02">
         <div>
           <p class="kicker mono"><b>02</b> genesis toolkit · v1.0</p>
           <h2 class="h2">Everything it needs to do real work</h2>
@@ -99,7 +99,7 @@ const DEFAULT_MEMORY = ["uses pnpm, never npm", "tests sit next to source as *.t
       </div>
 
       <div class="tiles">
-        <article class="card tile s7 reveal">
+        <article data-tilt="4" class="card tile s7 reveal">
           <div>
             <h3>Bring your own model</h3>
             <p class="desc">Eight providers built in, plus any OpenAI-compatible endpoint. Keys stay on your machine.</p>
@@ -127,7 +127,7 @@ const DEFAULT_MEMORY = ["uses pnpm, never npm", "tests sit next to source as *.t
           </div>
         </article>
 
-        <article class="card tile s5 reveal" data-delay="0.05">
+        <article data-tilt="5" class="card tile s5 reveal" data-delay="0.05">
           <div class="row">
             <h3>Execution approval</h3>
             <div class="seg" role="radiogroup" aria-label="Approval mode">
@@ -149,7 +149,7 @@ const DEFAULT_MEMORY = ["uses pnpm, never npm", "tests sit next to source as *.t
           </ul>
         </article>
 
-        <article class="card tile s5 reveal">
+        <article data-tilt="5" class="card tile s5 reveal">
           <div>
             <h3>Terminal execution, guarded</h3>
             <p class="desc">Read-only commands with no shell operators run straight away. Anything else asks first. Try one.</p>
@@ -168,7 +168,7 @@ const DEFAULT_MEMORY = ["uses pnpm, never npm", "tests sit next to source as *.t
           </div>
         </article>
 
-        <article class="card tile s7 reveal" data-delay="0.05">
+        <article data-tilt="4" class="card tile s7 reveal" data-delay="0.05">
           <div class="row">
             <div>
               <h3>Writes code, shows the diff</h3>
@@ -198,7 +198,7 @@ const DEFAULT_MEMORY = ["uses pnpm, never npm", "tests sit next to source as *.t
           </div>
         </article>
 
-        <article class="card tile s5 reveal">
+        <article data-tilt="5" class="card tile s5 reveal">
           <div>
             <h3>Memory you can edit</h3>
             <p class="desc">Plain Markdown in .kinetra/memory.md. Add a note, KINETRA reads it next session.</p>
@@ -216,7 +216,7 @@ const DEFAULT_MEMORY = ["uses pnpm, never npm", "tests sit next to source as *.t
           </form>
         </article>
 
-        <article class="card tile s7 reveal" data-delay="0.05">
+        <article data-tilt="4" class="card tile s7 reveal" data-delay="0.05">
           <div class="row">
             <div>
               <h3>Context it keeps</h3>
@@ -247,7 +247,7 @@ const DEFAULT_MEMORY = ["uses pnpm, never npm", "tests sit next to source as *.t
           </div>
         </article>
 
-        <article class="card tile s5 reveal">
+        <article data-tilt="5" class="card tile s5 reveal">
           <div>
             <h3>Sessions that resume</h3>
             <p class="desc">Every conversation is saved. Pick up any task where you left it.</p>
@@ -268,7 +268,7 @@ const DEFAULT_MEMORY = ["uses pnpm, never npm", "tests sit next to source as *.t
           </button>
         </article>
 
-        <article class="card tile s7 reveal" data-delay="0.05">
+        <article data-tilt="4" class="card tile s7 reveal" data-delay="0.05">
           <div class="row">
             <div>
               <h3>Tools, registered onchain</h3>
@@ -292,8 +292,10 @@ const DEFAULT_MEMORY = ["uses pnpm, never npm", "tests sit next to source as *.t
 
 <style scoped>
 .toolkit {
-  background: var(--bg);
   padding-top: 32px;
+}
+.tiles {
+  perspective: 1400px;
 }
 .tiles {
   display: grid;
