@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Check, Lock } from "lucide-vue-next";
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import { TESTNET } from "../lib/chain";
 import { X_URL } from "../lib/links";
 
@@ -10,7 +10,7 @@ const LEVELS = [
     name: "Genesis",
     version: "v1.0",
     era: "The Execution Era",
-    status: TESTNET ? "testnet live" : "mainnet live",
+    status: "mainnet live",
     features: [
       { t: "KINETRA CLI Agent", d: "A lightweight terminal-based AI agent that understands and executes user instructions." },
       { t: "Multi-Model Support", d: "Connect multiple AI model providers using your own API keys (BYOK)." },
@@ -32,7 +32,7 @@ const LEVELS = [
     name: "Relay",
     version: "v2.0",
     era: "Connected Intelligence",
-    status: "unlocks after Genesis",
+    status: TESTNET ? "testnet live" : "mainnet live",
     features: [
       { t: "Web Dashboard", d: "Manage agent sessions, tasks, settings and execution history." },
       { t: "MCP Integration", d: "Connect external tools and services through Model Context Protocol." },
@@ -70,7 +70,11 @@ const LEVELS = [
     ],
   },
 ];
-const selected = ref(LEVELS[0]);
+/** the level being shipped now; earlier levels are done */
+const CURRENT = 2;
+const selected = ref(LEVELS[CURRENT - 1]);
+// the current level is done once it is on mainnet; earlier ones always are
+const shipped = computed(() => selected.value.n < CURRENT || !TESTNET);
 </script>
 
 <template>
@@ -79,7 +83,7 @@ const selected = ref(LEVELS[0]);
       <div class="section-head reveal" data-n="04">
         <div>
           <p class="kicker mono"><b>04</b> roadmap</p>
-          <h2 class="h2">Three levels. Genesis is in play.</h2>
+          <h2 class="h2">Three levels. Relay is in play.</h2>
         </div>
         <p class="lede">
           It starts with one agent on your machine and grows into a network of agents that work, trade and pay each other on Robinhood
@@ -95,7 +99,7 @@ const selected = ref(LEVELS[0]);
             type="button"
             role="tab"
             class="level"
-            :class="{ on: selected.n === l.n, current: l.n === 1 }"
+            :class="{ on: selected.n === l.n, current: l.n === CURRENT }"
             :aria-selected="selected.n === l.n"
             data-tilt="6"
             @click="selected = l"
@@ -103,7 +107,7 @@ const selected = ref(LEVELS[0]);
             <span class="lv mono">level {{ l.n }}</span>
             <span class="title">{{ l.name }} <span class="mono ver">{{ l.version }}</span></span>
             <span class="status mono">
-              <span v-if="l.n === 1" class="dot"></span>
+              <span v-if="l.n <= CURRENT" class="dot"></span>
               <Lock v-else :size="14" :stroke-width="1.5" />
               {{ l.status }}
             </span>
@@ -113,10 +117,10 @@ const selected = ref(LEVELS[0]);
         <div class="card detail" role="tabpanel">
           <header>
             <p class="era">{{ selected.name }}: {{ selected.era }}</p>
-            <div v-if="selected.n === 1" class="track mono">
+            <div v-if="selected.n <= CURRENT" class="track mono">
               <span class="done"><Check :size="14" :stroke-width="1.5" /> testnet</span>
-              <span class="bar" :class="{ full: !TESTNET }"><span></span></span>
-              <span :class="{ done: !TESTNET }"><Check v-if="!TESTNET" :size="14" :stroke-width="1.5" /> V1.0 mainnet + $KNTR</span>
+              <span class="bar" :class="{ full: shipped }"><span></span></span>
+              <span :class="{ done: shipped }"><Check v-if="shipped" :size="14" :stroke-width="1.5" /> {{ selected.n === 1 ? "V1.0 mainnet + $KNTR" : "V2.0 mainnet" }}</span>
             </div>
           </header>
           <ul :key="selected.n" class="features">

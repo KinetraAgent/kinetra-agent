@@ -39,7 +39,25 @@ kinetra
 | Memory | plain Markdown in `~/.kinetra/memory.md` and `.kinetra/memory.md` |
 | Context | project rules from `KINETRA.md`, environment and memory load into every turn |
 | Sessions | every conversation is saved, `kinetra -c` continues, `kinetra -r <id>` resumes |
-| Tools | eight built-in tools, extensible with `~/.kinetra/tools/*.mjs` |
+| Tools | twelve built-in tools, extensible with `~/.kinetra/tools/*.mjs` |
+
+### Relay v2.0
+
+| | |
+|---|---|
+| Web dashboard | `kinetra dashboard`: sessions, history, usage, schedules and settings on 127.0.0.1 |
+| MCP | connect any stdio MCP server with `kinetra mcp add` |
+| Telegram | `kinetra telegram` runs your agent from a private bot, approvals in chat |
+| Workflows | reusable multi-step prompts in `.kinetra/workflows/*.md`, `kinetra run <name>` |
+| Scheduled tasks | `kinetra schedule add "<cron>" <workflow>` and `kinetra schedule daemon` |
+| Browser automation | `kinetra mcp add browser` (Playwright MCP) and the `fetch_url` tool |
+| Multi-agent | the `delegate` tool runs subtasks in specialist sub-agents with fresh context |
+| Advanced memory | memory grouped by topic, `recall` searches memory and past sessions |
+| GitHub | the `github` tool calls the REST API with your token or `gh` login |
+| Usage analytics | token, request and tool-call totals per model and day, `kinetra usage` |
+| Community tools | `kinetra tools add <name>` installs hash-checked tools from `KinetraToolRegistry` |
+
+See [Relay in getting started](docs/getting-started.md#relay-v20).
 
 ## Repository
 
@@ -69,8 +87,8 @@ Both are UUPS upgradeable (ERC-1967) and source verified (Sourcify exact match, 
 
 ## Roadmap
 
-- **Genesis v1.0**: the execution era. CLI agent, multi-model (BYOK), file operations, terminal execution, coding assistant, persistent memory, session history, execution approval, Git integration, context management, basic tool system, open-source repository, landing page
-- **Relay v2.0**: connected intelligence. Web dashboard, MCP, Telegram, workflow automation, scheduled tasks, browser automation, multi-agent coordination, advanced memory, GitHub integration, usage analytics, community tools, exploring $KNTR access to selected premium services
+- **Genesis v1.0** (shipped): the execution era. CLI agent, multi-model (BYOK), file operations, terminal execution, coding assistant, persistent memory, session history, execution approval, Git integration, context management, basic tool system, open-source repository, landing page
+- **Relay v2.0** (live): connected intelligence. Web dashboard, MCP, Telegram, workflow automation, scheduled tasks, browser automation, multi-agent coordination, advanced memory, GitHub integration, usage analytics, community tools. $KNTR access to selected premium services is still being explored and is not part of the v2.0 release
 - **Nexus v3.0**: the autonomous economy. Agent marketplace, agent-to-agent communication, agent service marketplace, smart agent wallets on Robinhood Chain, permission-based transactions, onchain identity and reputation, autonomous payments, KINETRA Cloud, developer SDK, $KNTR payments for supported marketplace services
 
 **$KNTR** is launched independently by the project owner through an external token launch platform, alongside the v1.0 mainnet release. Token deployment and liquidity are handled separately from KINETRA software development. The contract address is published only through official KINETRA channels.

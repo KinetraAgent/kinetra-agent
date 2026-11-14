@@ -149,7 +149,7 @@ onBeforeUnmount(() => {
 
     <div class="wrap layout">
       <div ref="copy" class="copy">
-        <p class="status mono"><span class="dot"></span>Genesis is live on {{ CHAIN_NAME }}</p>
+        <p class="status mono"><span class="dot"></span>Relay is live on {{ CHAIN_NAME }}</p>
         <h1 ref="title">From Intent <br />to <em>Execution.</em></h1>
         <p class="sub">
           KINETRA is an AI agent for your terminal. Say what you want done. It reads your files, writes the code, runs the

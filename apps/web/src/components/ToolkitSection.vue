@@ -90,7 +90,7 @@ const DEFAULT_MEMORY = ["uses pnpm, never npm", "tests sit next to source as *.t
     <div class="wrap">
       <div class="section-head reveal" data-n="02">
         <div>
-          <p class="kicker mono"><b>02</b> genesis toolkit · v1.0</p>
+          <p class="kicker mono"><b>02</b> relay toolkit · v2.0</p>
           <h2 class="h2">Everything it needs to do real work</h2>
         </div>
         <p class="lede">

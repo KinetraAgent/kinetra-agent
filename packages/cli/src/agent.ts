@@ -1,7 +1,7 @@
 import { execFileSync } from "node:child_process";
 import os from "node:os";
 import { complete, type Msg, type Provider, type ToolCall } from "./providers.ts";
-import { loadContext, type Mode, type Session } from "./store.ts";
+import { addUsage, loadContext, newSessionId, type Mode, type Session } from "./store.ts";
 import type { Approval, Tool } from "./tools.ts";
 
 const MAX_STEPS = 50;
@@ -25,6 +25,33 @@ export interface AgentState {
   tools: Tool[];
   /** tools the user allowed for the rest of this session */
   allowed: Set<string>;
+  /** 1 inside a sub-agent, which cannot delegate again */
+  depth?: number;
+}
+
+/** Runs a task in a fresh sub-agent that shares tools, mode and approvals; returns its last answer. */
+async function delegate(s: AgentState, task: string, role: string | undefined, io: AgentIO, signal?: AbortSignal) {
+  const session: Session = { ...s.session, id: newSessionId(), title: "", messages: [], usage: undefined };
+  const sub: AgentState = { ...s, session, depth: 1, tools: s.tools.filter((t) => t.name !== "delegate") };
+  const label = role ? `${role} agent` : "sub-agent";
+  const subIO: AgentIO = {
+    ...io,
+    text: () => {},
+    toolStart: (name, summary) => io.toolStart(`${label} › ${name}`, summary),
+    toolEnd: (name, result, isError) => io.toolEnd(`${label} › ${name}`, result, isError),
+    notice: (msg) => io.notice(`${label}: ${msg}`),
+  };
+  const prompt = role ? `You are working as a ${role}, a sub-agent of KINETRA. Finish this task and reply with the result:\n\n${task}` : task;
+  await runTurn(sub, prompt, subIO, signal);
+  // the parent session pays for its sub-agents
+  if (session.usage) {
+    const total = (s.session.usage ??= { input: 0, output: 0, requests: 0 });
+    total.input += session.usage.input;
+    total.output += session.usage.output;
+    total.requests += session.usage.requests;
+  }
+  const answer = session.messages.findLast((m) => m.role === "assistant" && m.content);
+  return answer?.content || "the sub-agent finished without an answer";
 }
 
 export async function systemPrompt(root: string): Promise<string> {
@@ -42,7 +69,8 @@ export async function systemPrompt(root: string): Promise<string> {
 - Verify your work with the project's tests or build when that is cheap and relevant.
 - File changes and commands may need the user's approval. If one is declined, adapt or ask instead of retrying it.
 - Before committing, call git_diff and summarize the changes.
-- Save lasting facts about the project or the user's preferences with remember.
+- Save lasting facts about the project or the user's preferences with remember, filed under a topic. Use recall when the user refers to earlier work.
+- For a large task, delegate self-contained parts to sub-agents so your own context stays focused.
 - Keep replies short. When you finish, say what changed and anything the user still has to do.`,
     `Environment: ${os.type()} ${os.release()}, shell ${process.env.SHELL ?? process.env.ComSpec ?? "sh"}, project ${root}${branch ? `, git branch ${branch}` : ""}, date ${new Date().toISOString().slice(0, 10)}`,
     ctx.instructions && `# Project instructions (KINETRA.md)\n${ctx.instructions}`,
@@ -83,7 +111,7 @@ async function runCall(s: AgentState, call: ToolCall, io: AgentIO, signal?: Abor
   const missing = (tool.parameters.required ?? []).filter((k) => args[k] === undefined);
   if (missing.length) return fail(`missing required argument: ${missing.join(", ")}`);
 
-  const ctx = { root: s.root, signal };
+  const ctx = { root: s.root, signal, delegate: s.depth ? undefined : (task: string, role?: string) => delegate(s, task, role, io, signal) };
   try {
     const kind = tool.approval?.(args) ?? null;
     if (kind && needsAsk(s, kind, tool.name)) {
@@ -121,6 +149,7 @@ export async function runTurn(s: AgentState, input: string, io: AgentIO, signal?
         io.text(d);
       },
     }).finally(() => io.busy(false));
+    if (reply.usage) addUsage(session, reply.usage);
 
     if (reply.stop === "refusal" || reply.stop === "length") {
       // a cut-off turn may hold half-written tool calls: keep the text, never run them

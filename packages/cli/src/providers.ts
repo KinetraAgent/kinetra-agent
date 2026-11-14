@@ -24,6 +24,7 @@ export interface Reply {
   text: string;
   calls: ToolCall[];
   stop: "done" | "tools" | "refusal" | "length";
+  usage?: { input: number; output: number };
   anthropic?: Anthropic.Beta.BetaContentBlockParam[];
 }
 
@@ -120,7 +121,12 @@ async function anthropic(p: Provider, req: CompleteRequest): Promise<Reply> {
   const text = msg.content.flatMap((b) => (b.type === "text" ? [b.text] : [])).join("");
   const stop =
     msg.stop_reason === "refusal" ? "refusal" : msg.stop_reason === "max_tokens" ? "length" : calls.length ? "tools" : "done";
-  return { text, calls, stop, anthropic: msg.content as Anthropic.Beta.BetaContentBlockParam[] };
+  const u = msg.usage;
+  const usage = {
+    input: u.input_tokens + (u.cache_read_input_tokens ?? 0) + (u.cache_creation_input_tokens ?? 0),
+    output: u.output_tokens,
+  };
+  return { text, calls, stop, usage, anthropic: msg.content as Anthropic.Beta.BetaContentBlockParam[] };
 }
 
 export function toAnthropic(messages: Msg[]): Anthropic.Beta.BetaMessageParam[] {
@@ -174,6 +180,7 @@ async function openai(p: Provider, req: CompleteRequest): Promise<Reply> {
     body: JSON.stringify({
       model: p.model,
       stream: true,
+      stream_options: { include_usage: true },
       messages: [{ role: "system", content: req.system }, ...toOpenAI(req.messages)],
       tools: req.tools.map((t) => ({ type: "function", function: { name: t.name, description: t.description, parameters: t.parameters } })),
     }),
@@ -187,6 +194,7 @@ export async function readSSE(body: ReadableStream<Uint8Array>, onText: (d: stri
   let text = "";
   let finish = "";
   let buf = "";
+  let usage: Reply["usage"];
   const calls: ToolCall[] = [];
   const decoder = new TextDecoder();
   for await (const bytes of body) {
@@ -198,6 +206,8 @@ export async function readSSE(body: ReadableStream<Uint8Array>, onText: (d: stri
       if (!line.startsWith("data:") || line === "data: [DONE]") continue;
       const event = JSON.parse(line.slice(5));
       if (event.error) throw new Error(event.error.message ?? JSON.stringify(event.error));
+      // include_usage sends the totals in a last chunk with no choices
+      if (event.usage) usage = { input: event.usage.prompt_tokens ?? 0, output: event.usage.completion_tokens ?? 0 };
       const choice = event.choices?.[0];
       if (!choice) continue;
       if (choice.delta?.content) {
@@ -215,5 +225,5 @@ export async function readSSE(body: ReadableStream<Uint8Array>, onText: (d: stri
   }
   const done = calls.filter(Boolean).map((c, i) => ({ ...c, id: c.id || `call_${i}_${Date.now().toString(36)}` }));
   const stop = finish === "length" ? "length" : finish === "content_filter" ? "refusal" : done.length ? "tools" : "done";
-  return { text, calls: done, stop };
+  return { text, calls: done, stop, usage };
 }

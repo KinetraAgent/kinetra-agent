@@ -3,11 +3,14 @@ import { existsSync } from "node:fs";
 import { mkdir, readdir, readFile, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
-import { HOME, remember } from "./store.ts";
+import { loadMcpTools } from "./mcp.ts";
+import { HOME, listSessions, loadContext, remember, type Config } from "./store.ts";
 
 export interface ToolContext {
   root: string;
   signal?: AbortSignal;
+  /** Runs a task in a sub-agent with a fresh context and returns its final answer. */
+  delegate?(task: string, role?: string): Promise<string>;
 }
 
 export type Approval = "edit" | "exec" | null;
@@ -263,19 +266,163 @@ export const BUILTIN_TOOLS: Tool[] = [
       "Save a durable fact to memory: project scope for this codebase, global scope for the user's preferences. Memory is loaded in every future session.",
     parameters: {
       type: "object",
-      properties: { note: { type: "string" }, scope: { type: "string", enum: ["project", "global"] } },
+      properties: {
+        note: { type: "string" },
+        scope: { type: "string", enum: ["project", "global"] },
+        topic: { type: "string", description: "Section to file it under, e.g. build, style, architecture" },
+      },
       required: ["note"],
     },
-    async run({ note, scope = "project" }, { root }) {
-      return `saved to ${await remember(scope, root, note)}`;
+    async run({ note, scope = "project", topic }, { root }) {
+      return `saved to ${await remember(scope, root, note, topic)}`;
+    },
+  },
+  {
+    name: "recall",
+    description:
+      "Search memory and earlier sessions in this project for something the user or you said before. Use it when the user refers to past work or a decision you do not see in context.",
+    parameters: {
+      type: "object",
+      properties: { query: { type: "string", description: "Words to look for" } },
+      required: ["query"],
+    },
+    async run({ query }, { root }) {
+      return recall(query, root);
+    },
+  },
+  {
+    name: "fetch_url",
+    description: "Fetch a web page or API over HTTP GET and return it as text, HTML reduced to readable text.",
+    parameters: {
+      type: "object",
+      properties: { url: { type: "string" } },
+      required: ["url"],
+    },
+    // the URL itself can carry data out of the project
+    approval: () => "exec",
+    preview: ({ url }) => `GET ${url}`,
+    async run({ url }, { signal }) {
+      if (!/^https?:\/\//.test(url)) throw new Error("only http and https URLs");
+      const res = await fetch(url, { signal: AbortSignal.any([AbortSignal.timeout(30_000), ...(signal ? [signal] : [])]) });
+      const type = res.headers.get("content-type") ?? "";
+      const body = await res.text();
+      return clip(`HTTP ${res.status} ${type}\n${type.includes("html") ? htmlToText(body) : body}`);
+    },
+  },
+  {
+    name: "github",
+    description:
+      "Call the GitHub REST API, e.g. GET /repos/{repo}/pulls, POST /repos/{repo}/issues. {repo} is this project's origin remote. Uses GITHUB_TOKEN or the gh CLI login.",
+    parameters: {
+      type: "object",
+      properties: {
+        method: { type: "string", enum: ["GET", "POST", "PATCH", "PUT", "DELETE"] },
+        path: { type: "string", description: "API path starting with /" },
+        body: { type: "object", description: "JSON body for POST, PATCH and PUT" },
+      },
+      required: ["path"],
+    },
+    approval: ({ method = "GET" }) => (method === "GET" ? null : "exec"),
+    preview: ({ method = "GET", path: p, body }) => `${method} ${p}${body ? "\n" + JSON.stringify(body, null, 2) : ""}`,
+    async run({ method = "GET", path: p, body }, { root, signal }) {
+      if (!p.startsWith("/") || p.startsWith("//")) throw new Error("path must start with /, e.g. /repos/{repo}/pulls");
+      const target = p.includes("{repo}") ? p.replaceAll("{repo}", await githubRepo(root)) : p;
+      const res = await fetch(`https://api.github.com${target}`, {
+        method,
+        signal,
+        headers: {
+          accept: "application/vnd.github+json",
+          authorization: `Bearer ${await githubToken()}`,
+          "x-github-api-version": "2022-11-28",
+          ...(body ? { "content-type": "application/json" } : {}),
+        },
+        body: body ? JSON.stringify(body) : undefined,
+      });
+      const text = await res.text();
+      if (!res.ok) throw new Error(`GitHub ${res.status}: ${text.slice(0, 1000)}`);
+      return clip(text || `HTTP ${res.status}`);
+    },
+  },
+  {
+    name: "delegate",
+    description:
+      "Hand a self-contained subtask to a sub-agent with its own fresh context and the same tools, e.g. research across many files or a separate change. Give it everything it needs; it returns only its final answer. Optional role makes it a specialist, e.g. reviewer or test writer.",
+    parameters: {
+      type: "object",
+      properties: { task: { type: "string" }, role: { type: "string" } },
+      required: ["task"],
+    },
+    async run({ task, role }, { delegate }) {
+      if (!delegate) throw new Error("sub-agents cannot delegate further");
+      return delegate(task, role);
     },
   },
 ];
 
-/** Built-in tools plus the user's own tools in ~/.kinetra/tools/*.mjs. */
-export async function loadTools(onWarn: (msg: string) => void = console.error): Promise<Tool[]> {
+export function htmlToText(html: string): string {
+  return html
+    .replace(/<(script|style|noscript|svg)[\s\S]*?<\/\1>/gi, "")
+    .replace(/<(br|\/p|\/div|\/li|\/h\d|\/tr)[^>]*>/gi, "\n")
+    .replace(/<[^>]+>/g, "")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&amp;/g, "&")
+    .replace(/[ \t]+/g, " ")
+    .replace(/\n\s*\n+/g, "\n\n")
+    .trim();
+}
+
+/** Memory lines and past messages in this project that contain any query word, best matches first. */
+export async function recall(query: string, root: string): Promise<string> {
+  const words = query.toLowerCase().split(/\W+/).filter((w) => w.length > 1);
+  if (!words.length) return "query has no words";
+  const score = (text: string) => words.filter((w) => text.toLowerCase().includes(w)).length;
+  const hits: { score: number; text: string }[] = [];
+  const ctx = await loadContext(root);
+  for (const [where, text] of [["project memory", ctx.projectMemory], ["global memory", ctx.globalMemory]]) {
+    for (const line of text.split("\n")) if (score(line)) hits.push({ score: score(line) + 1, text: `${where}: ${line.trim()}` });
+  }
+  for (const s of await listSessions(root)) {
+    for (const m of s.messages) {
+      if (m.role === "tool" || !m.content) continue;
+      const n = score(m.content);
+      if (n) hits.push({ score: n, text: `session ${s.id} (${s.updatedAt.slice(0, 10)}) ${m.role}: ${m.content.slice(0, 400)}` });
+    }
+  }
+  hits.sort((a, b) => b.score - a.score);
+  return hits.slice(0, 30).map((h) => h.text).join("\n") || "nothing found";
+}
+
+const capture = (cmd: string, args: string[], cwd?: string) =>
+  new Promise<string>((resolve, reject) =>
+    execFile(cmd, args, { cwd }, (err, stdout) => (err ? reject(err) : resolve(stdout.trim()))),
+  );
+
+async function githubToken() {
+  const token = process.env.GITHUB_TOKEN || process.env.GH_TOKEN || (await capture("gh", ["auth", "token"]).catch(() => ""));
+  if (!token) throw new Error("no GitHub token. Export GITHUB_TOKEN or run gh auth login");
+  return token;
+}
+
+/** owner/repo of the origin remote. */
+export async function githubRepo(root: string) {
+  const url = await capture("git", ["remote", "get-url", "origin"], root).catch(() => "");
+  const m = url.match(/github\.com[:/]([^/]+\/[^/]+?)(\.git)?$/);
+  if (!m) throw new Error("this project has no GitHub origin remote; use /repos/<owner>/<repo>/… instead");
+  return m[1];
+}
+
+/** Built-in tools, the user's own tools in ~/.kinetra/tools/*.mjs and the tools of configured MCP servers. */
+export async function loadTools(onWarn: (msg: string) => void = console.error, config: Config = {}, version = ""): Promise<Tool[]> {
   const tools = [...BUILTIN_TOOLS];
   const dir = path.join(HOME, "tools");
+  for (const tool of await loadMcpTools(config.mcpServers, version, onWarn)) {
+    if (tools.some((t) => t.name === tool.name)) onWarn(`skipped MCP tool ${tool.name}: name taken`);
+    else tools.push(tool);
+  }
   if (!existsSync(dir)) return tools;
   for (const file of (await readdir(dir)).filter((f) => /\.m?js$/.test(f))) {
     try {

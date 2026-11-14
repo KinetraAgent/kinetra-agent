@@ -53,7 +53,7 @@ const cards = computed(() => [
   { big: live.block ? `#${fmt(live.block)}` : "live", small: "latest block" },
   { big: String(deployment.chainId), small: "robinhood chain id" },
   { big: "MIT", small: "open source" },
-  { big: "v1.0", small: "genesis is live" },
+  { big: "v2.0", small: "relay is live" },
 ]);
 let lanes: { x: number; y: number; rx: number; ry: number; rz: number; spin: number }[] = [];
 function layoutLanes() {
