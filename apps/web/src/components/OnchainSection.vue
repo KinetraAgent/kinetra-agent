@@ -14,12 +14,14 @@ function copyAddr(a: string) {
   setTimeout(() => (copiedAddr.value = ""), 1600);
 }
 
-const latestDay = computed(() => live.txDays.at(-1));
+const daily = computed(() => live.tx.mode === "days");
+const chartTitle = computed(() => `${daily.value ? "Daily transactions" : "Transactions per block"} on ${CHAIN_NAME}`);
+const latestDay = computed(() => live.tx.points.at(-1));
 const change = computed(() => {
-  const [prev, cur] = live.txDays.slice(-2);
+  const [prev, cur] = live.tx.points.slice(-2);
   if (!prev || !cur) return null;
   const pct = ((cur.count - prev.count) / prev.count) * 100;
-  return { pct: `${pct >= 0 ? "+" : ""}${pct.toFixed(1)}%`, up: pct >= 0, vs: new Date(prev.date + "T00:00:00Z").toLocaleDateString("en-US", { timeZone: "UTC", month: "short", day: "numeric" }) };
+  return { pct: `${pct >= 0 ? "+" : ""}${pct.toFixed(1)}%`, up: pct >= 0, vs: prev.label };
 });
 const published = computed(() =>
   live.release ? new Date(live.release.publishedAt * 1000).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "",
@@ -45,14 +47,14 @@ const tarball = computed(() => live.release?.uri.split("/").pop() ?? "");
         <article class="card pane chart-pane reveal" data-tilt="2">
           <header class="pane-head">
             <div>
-              <p class="label">Daily transactions on {{ CHAIN_NAME }}</p>
+              <p class="label">{{ chartTitle }}</p>
               <p v-if="latestDay" class="figure mono">{{ fmt(latestDay.count) }}</p>
               <p v-else class="figure"><span class="skeleton wide"></span></p>
               <p v-if="change" class="change mono" :class="{ up: change.up }">{{ change.pct }} vs {{ change.vs }}</p>
             </div>
-            <span class="meta mono">last 30 days · Blockscout</span>
+            <span class="meta mono">{{ daily ? "last 30 days · Blockscout" : "last hour · live from RPC" }}</span>
           </header>
-          <TxChart v-if="live.txDays.length > 1" :data="live.txDays" />
+          <TxChart v-if="live.tx.points.length > 1" :data="live.tx.points" :caption="chartTitle" />
           <div v-else class="chart-wait" aria-hidden="true"></div>
         </article>
 

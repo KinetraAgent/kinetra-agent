@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from "vue";
-import { fmt } from "../lib/chain";
+import { fmt, type TxPoint } from "../lib/chain";
 import { gsap, reduced } from "../lib/motion";
 
-const props = defineProps<{ data: { date: string; count: number }[] }>();
+const props = defineProps<{ data: TxPoint[]; caption: string }>();
 
 const H = 240;
 const PAD = { top: 16, right: 16, bottom: 28, left: 52 };
@@ -14,8 +14,6 @@ const active = ref<number | null>(null);
 let ro: ResizeObserver | undefined;
 
 const compact = new Intl.NumberFormat("en-US", { notation: "compact", maximumFractionDigits: 1 });
-const day = (d: string, opts: Intl.DateTimeFormatOptions = { month: "short", day: "numeric" }) =>
-  new Date(d + "T00:00:00Z").toLocaleDateString("en-US", { timeZone: "UTC", ...opts });
 
 // a trend does not need a zero baseline; the bottom tick stays unlabeled so the axis never prints 0
 const scale = computed(() => {
@@ -48,7 +46,7 @@ const area = computed(() => {
 const xLabels = computed(() => {
   const n = props.data.length;
   const every = width.value < 480 ? 10 : 5;
-  return props.data.map((d, i) => ({ i, label: day(d.date) })).filter(({ i }) => (n - 1 - i) % every === 0);
+  return props.data.map((d, i) => ({ i, label: d.label })).filter(({ i }) => (n - 1 - i) % every === 0);
 });
 
 function pick(e: PointerEvent) {
@@ -70,7 +68,7 @@ const tip = computed(() => {
   if (active.value === null) return null;
   const d = props.data[active.value];
   const [x, y] = points.value[active.value];
-  return { x, y, date: day(d.date, { weekday: "short", month: "short", day: "numeric" }), count: fmt(d.count), left: x > width.value * 0.7 };
+  return { x, y, date: d.title, count: fmt(d.count), left: x > width.value * 0.7 };
 });
 
 onMounted(() => {
@@ -94,7 +92,7 @@ onBeforeUnmount(() => ro?.disconnect());
       :height="H"
       role="img"
       tabindex="0"
-      aria-label="Daily transactions over the last 30 days. Use the arrow keys to read each day."
+      :aria-label="`${caption}. Use the arrow keys to read each point.`"
       @pointermove="pick"
       @pointerleave="active = null"
       @keydown="onKey"
@@ -119,9 +117,9 @@ onBeforeUnmount(() => ro?.disconnect());
       <span class="mono">{{ tip.count }} txs</span>
     </div>
     <table class="sr">
-      <caption>Daily transactions</caption>
-      <tr v-for="d in data" :key="d.date">
-        <td>{{ d.date }}</td>
+      <caption>{{ caption }}</caption>
+      <tr v-for="d in data" :key="d.key">
+        <td>{{ d.title }}</td>
         <td>{{ d.count }}</td>
       </tr>
     </table>

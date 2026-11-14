@@ -34,7 +34,8 @@ const chain = defineChain({
 });
 
 // same-origin proxy first: some ISPs block the chain hosts by DNS
-const client = createPublicClient({ chain, transport: fallback([http("/rpc"), http(PUBLIC_RPC)]) });
+// batched: the block chart reads 30 blocks at once and /rpc is rate limited per visitor
+const client = createPublicClient({ chain, transport: fallback([http("/rpc", { batch: true }), http(PUBLIC_RPC, { batch: true })]) });
 
 const releaseAbi = parseAbi([
   "function latest() view returns (string version, bytes32 checksum, string uri, uint64 publishedAt)",
@@ -71,8 +72,16 @@ export const live = shallowReactive({
   release: deployment.release ?? null,
   releaseCount: null as number | null,
   tools: (deployment.tools ?? []).map((t) => ({ ...t, verified: true })) as Tool[],
-  txDays: [] as { date: string; count: number }[],
+  tx: { mode: "days" as "days" | "blocks", points: [] as TxPoint[] },
 });
+
+/** One chart point: `label` on the axis, `title` in the tooltip. */
+export interface TxPoint {
+  key: string;
+  label: string;
+  title: string;
+  count: number;
+}
 
 const releaseAt = CONTRACTS[0].proxy;
 const toolsAt = CONTRACTS[1].proxy;
@@ -89,16 +98,43 @@ async function readRegistries() {
   if (tools.length) live.tools = tools.map(({ name, manifestURI, manifestHash, verified }) => ({ name, manifestURI, manifestHash, verified }));
 }
 
-async function readTxChart() {
+const utcDay = (d: string, opts: Intl.DateTimeFormatOptions) =>
+  new Date(d + "T00:00:00Z").toLocaleDateString("en-US", { timeZone: "UTC", ...opts });
+
+async function readDailyTx(): Promise<TxPoint[]> {
   const path = "/v2/stats/charts/transactions";
   const res = await fetch(`/explorer-api${path}`).catch(() => null);
   const ok = res?.ok ? res : await fetch(`${EXPLORER}/api${path}`);
   const { chart_data } = (await ok.json()) as { chart_data: { date: string; transactions_count: number }[] };
-  live.txDays = chart_data
-    .map((d) => ({ date: d.date, count: d.transactions_count }))
-    .filter((d) => d.count > 0)
+  return chart_data
+    .filter((d) => d.transactions_count > 0)
     .sort((a, b) => a.date.localeCompare(b.date))
-    .slice(-30);
+    .slice(-30)
+    .map((d) => ({
+      key: d.date,
+      label: utcDay(d.date, { month: "short", day: "numeric" }),
+      title: utcDay(d.date, { weekday: "short", month: "short", day: "numeric" }),
+      count: d.transactions_count,
+    }));
+}
+
+/** Transactions in 30 blocks spread over the last hour (Robinhood Chain makes about 9 blocks a second). */
+async function readBlockTx(samples = 30, every = 1000n): Promise<TxPoint[]> {
+  const head = await client.getBlockNumber({ cacheTime: 0 });
+  const blocks = await Promise.all(
+    Array.from({ length: samples }, (_, i) => client.getBlock({ blockNumber: head - BigInt(samples - 1 - i) * every })),
+  );
+  const time = (t: bigint) => new Date(Number(t) * 1000).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
+  return blocks
+    .map((b) => ({ key: String(b.number), label: time(b.timestamp), title: `block #${fmt(b.number)} · ${time(b.timestamp)}`, count: b.transactions.length }))
+    .filter((p) => p.count > 0);
+}
+
+// The mainnet explorer API sits behind a bot challenge that also stops the site's proxy, so fall back to
+// reading blocks straight from the chain rather than leave the chart empty.
+async function readTxChart() {
+  const days = await readDailyTx().catch(() => []);
+  live.tx = days.length > 1 ? { mode: "days", points: days } : { mode: "blocks", points: await readBlockTx() };
 }
 
 let started = false;
