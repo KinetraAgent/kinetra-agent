@@ -40,4 +40,4 @@ Custom tools ask before every call unless they define `approval: () => null`. To
 
 ## Onchain registry
 
-Built-in tool manifests are published at `https://kinetraagent.tech/tools/<name>.json` and registered in `KinetraToolRegistry` with their sha256. Anyone can register a tool name; the owner sets the verified flag after review, and an update by the author clears it.
+Built-in tool manifests are published at `https://testnet.kinetraagent.tech/tools/<name>.json` on testnet and `https://kinetraagent.tech/tools/<name>.json` on mainnet, and registered in `KinetraToolRegistry` with their sha256. Anyone can register a tool name; the owner sets the verified flag after review, and an update by the author clears it.

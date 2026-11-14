@@ -5,7 +5,7 @@
 set -eu
 
 REGISTRY="0xe2b4fE4EF5d805D3F06F95704c9A3a2f19BA06AF"
-RPCS="https://rpc.testnet.chain.robinhood.com https://kinetraagent.tech/rpc"
+RPCS="https://rpc.testnet.chain.robinhood.com https://testnet.kinetraagent.tech/rpc"
 
 fail() {
   printf '%s\n' "$1" >&2

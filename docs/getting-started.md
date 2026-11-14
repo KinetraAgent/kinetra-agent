@@ -3,7 +3,7 @@
 ## Install
 
 ```sh
-curl -fsSL https://kinetraagent.tech/install.sh | sh
+curl -fsSL https://testnet.kinetraagent.tech/install.sh | sh
 ```
 
 Requirements: Node.js 22 or newer and npm. The script

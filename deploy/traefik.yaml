@@ -1,4 +1,5 @@
 # /data/coolify/proxy/dynamic/kinetra.yaml on the VPS
+# The testnet host has its own routers so its certificate is issued apart from the apex one.
 http:
   routers:
     kinetra-http:
@@ -8,6 +9,17 @@ http:
       service: kinetra-web
     kinetra-web:
       rule: Host(`kinetraagent.tech`) || Host(`www.kinetraagent.tech`)
+      entryPoints: [https]
+      service: kinetra-web
+      tls:
+        certResolver: letsencrypt
+    kinetra-testnet-http:
+      rule: Host(`testnet.kinetraagent.tech`)
+      entryPoints: [http]
+      middlewares: [kinetra-https]
+      service: kinetra-web
+    kinetra-testnet:
+      rule: Host(`testnet.kinetraagent.tech`)
       entryPoints: [https]
       service: kinetra-web
       tls:

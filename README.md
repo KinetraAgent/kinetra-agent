@@ -6,7 +6,7 @@
 <p align="center"><b>From Intent to Execution.</b><br/>A terminal AI agent that reads your code, writes the change, runs the commands and asks before anything lands. Releases are notarized on Robinhood Chain.</p>
 
 <p align="center">
-  <a href="https://kinetraagent.tech">kinetraagent.tech</a> ·
+  <a href="https://testnet.kinetraagent.tech">testnet.kinetraagent.tech</a> ·
   <a href="https://x.com/KinetraAgent">@KinetraAgent</a> ·
   <a href="docs/getting-started.md">Docs</a> ·
   $KNTR
@@ -15,7 +15,7 @@
 ## Install
 
 ```sh
-curl -fsSL https://kinetraagent.tech/install.sh | sh
+curl -fsSL https://testnet.kinetraagent.tech/install.sh | sh
 ```
 
 The installer reads the latest release from `KinetraReleaseRegistry` on Robinhood Chain, hashes the downloaded package and installs it only when the sha256 matches. Needs Node.js 22 or newer. On Windows, install the tarball from the [latest release](https://github.com/KinetraAgent/kinetra-agent/releases) with `npm install -g <url>`.
@@ -69,9 +69,11 @@ Both are UUPS upgradeable (ERC-1967) and verified on Blockscout. Addresses live 
 
 ## Roadmap
 
-- **Genesis v1.0**: the execution era. CLI agent, multi-model, approvals, memory, sessions, onchain releases, $KNTR launch with mainnet
-- **Relay v2.0**: connected intelligence. Dashboard, MCP, Telegram, workflows, scheduled tasks, browser automation, multi-agent
-- **Nexus v3.0**: the autonomous economy. Agent marketplace, agent wallets on Robinhood Chain, onchain identity and reputation, autonomous payments
+- **Genesis v1.0**: the execution era. CLI agent, multi-model (BYOK), file operations, terminal execution, coding assistant, persistent memory, session history, execution approval, Git integration, context management, basic tool system, open-source repository, landing page
+- **Relay v2.0**: connected intelligence. Web dashboard, MCP, Telegram, workflow automation, scheduled tasks, browser automation, multi-agent coordination, advanced memory, GitHub integration, usage analytics, community tools, exploring $KNTR access to selected premium services
+- **Nexus v3.0**: the autonomous economy. Agent marketplace, agent-to-agent communication, agent service marketplace, smart agent wallets on Robinhood Chain, permission-based transactions, onchain identity and reputation, autonomous payments, KINETRA Cloud, developer SDK, $KNTR payments for supported marketplace services
+
+**$KNTR** is launched independently by the project owner through an external token launch platform, alongside the v1.0 mainnet release. Token deployment and liquidity are handled separately from KINETRA software development. The contract address is published only through official KINETRA channels.
 
 ## License
 

@@ -5,7 +5,7 @@ import { ethers, network } from "hardhat";
 
 // Publishes the CLI tarball checksum and registers the built-in tools.
 const REPO = "https://github.com/KinetraAgent/kinetra-agent";
-const SITE = "https://kinetraagent.tech";
+const SITE = network.name === "robinhood" ? "https://kinetraagent.tech" : "https://testnet.kinetraagent.tech";
 const cliDir = "../cli";
 const webTools = "../../apps/web/public/tools";
 
@@ -54,7 +54,8 @@ async function main() {
   const rpc = (network.config as { url: string }).url;
   const installer = readFileSync(`${cliDir}/install.sh`, "utf8")
     .replace("__REGISTRY__", contracts.KinetraReleaseRegistry.proxy)
-    .replace("__RPC__", rpc);
+    .replace("__RPC__", rpc)
+    .replace("__SITE__", SITE);
   writeFileSync("../../apps/web/public/install.sh", installer);
 }
 

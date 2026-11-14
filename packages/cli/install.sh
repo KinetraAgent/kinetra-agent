@@ -5,7 +5,7 @@
 set -eu
 
 REGISTRY="__REGISTRY__"
-RPCS="__RPC__ https://kinetraagent.tech/rpc"
+RPCS="__RPC__ __SITE__/rpc"
 
 fail() {
   printf '%s\n' "$1" >&2
