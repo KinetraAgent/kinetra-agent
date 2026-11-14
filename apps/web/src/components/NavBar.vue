@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Menu, Moon, Sun, X } from "lucide-vue-next";
+import { ArrowUpRight, Menu, Moon, Sun, X } from "lucide-vue-next";
 import { computed, onBeforeUnmount, onMounted, ref } from "vue";
 import { live } from "../lib/chain";
 import { GITHUB, X_URL } from "../lib/links";
@@ -52,6 +52,9 @@ onBeforeUnmount(() => {
   spy?.disconnect();
 });
 
+/** Scrambles only the label, so the arrow icon beside it stays. */
+const scramble = (e: MouseEvent, text: string) => shuffle((e.currentTarget as HTMLElement).querySelector<HTMLElement>(".t")!, text);
+
 function go(id: string) {
   open.value = false;
   scrollToId(id);
@@ -66,17 +69,13 @@ function go(id: string) {
         <img src="/logo-96.webp" width="24" height="24" alt="" />
         <span>KINETRA</span>
       </a>
-      <nav class="links pill" aria-label="Sections">
-        <a
-          v-for="l in links"
-          :key="l.id"
-          :href="`#${l.id}`"
-          :class="{ on: active === l.id }"
-          @click.prevent="go(l.id)"
-          @mouseenter="shuffle($event.target as HTMLElement, l.label)"
-          >{{ l.label }}</a
-        >
-        <a :href="`${GITHUB}/tree/main/docs`" target="_blank" rel="noopener" @mouseenter="shuffle($event.target as HTMLElement, 'Docs')">Docs</a>
+      <nav class="links" aria-label="Sections">
+        <a v-for="l in links" :key="l.id" :href="`#${l.id}`" :class="{ on: active === l.id }" @click.prevent="go(l.id)" @mouseenter="scramble($event, l.label)">
+          <span class="t">{{ l.label }}</span><ArrowUpRight class="arrow" :size="13" :stroke-width="1.75" aria-hidden="true" />
+        </a>
+        <a :href="`${GITHUB}/tree/main/docs`" target="_blank" rel="noopener" @mouseenter="scramble($event, 'Docs')">
+          <span class="t">Docs</span><ArrowUpRight class="arrow" :size="13" :stroke-width="1.75" aria-hidden="true" />
+        </a>
       </nav>
       <div class="end">
         <button class="icon-btn" type="button" :aria-label="`Switch to ${theme === 'dark' ? 'light' : 'dark'} theme`" @click="toggleTheme">
@@ -84,7 +83,6 @@ function go(id: string) {
           <Moon v-else :size="18" :stroke-width="1.5" />
         </button>
         <a class="icon-btn hide-sm" :href="X_URL" target="_blank" rel="noopener" aria-label="KINETRA on X"><BrandIcon name="x" /></a>
-        <a class="icon-btn hide-sm" :href="GITHUB" target="_blank" rel="noopener" aria-label="KINETRA on GitHub"><BrandIcon name="github" /></a>
         <button class="install chip mono" type="button" data-cursor="install" @click="go('install')">
           Install
           <span class="badge" :title="'Latest block, last three digits'"><RollingNumber :value="tick" /></span>
@@ -96,10 +94,9 @@ function go(id: string) {
       </div>
     </div>
     <nav v-if="open" class="sheet wrap" aria-label="Sections">
-      <a v-for="l in links" :key="l.id" :href="`#${l.id}`" @click.prevent="go(l.id)">{{ l.label }}</a>
-      <a :href="`${GITHUB}/tree/main/docs`" target="_blank" rel="noopener">Docs</a>
-      <a :href="X_URL" target="_blank" rel="noopener">X @KinetraAgent</a>
-      <a :href="GITHUB" target="_blank" rel="noopener">GitHub</a>
+      <a v-for="l in links" :key="l.id" :href="`#${l.id}`" @click.prevent="go(l.id)">{{ l.label }}<ArrowUpRight class="arrow" :size="13" :stroke-width="1.75" aria-hidden="true" /></a>
+      <a :href="`${GITHUB}/tree/main/docs`" target="_blank" rel="noopener">Docs<ArrowUpRight class="arrow" :size="13" :stroke-width="1.75" aria-hidden="true" /></a>
+      <a :href="X_URL" target="_blank" rel="noopener">X @KinetraAgent<ArrowUpRight class="arrow" :size="13" :stroke-width="1.75" aria-hidden="true" /></a>
     </nav>
   </header>
 </template>
@@ -157,20 +154,11 @@ function go(id: string) {
   font-size: 13px;
   letter-spacing: 0.16em;
 }
-/* the section links sit between two accent brackets */
-.pill {
-  position: relative;
+/* plain text links right beside the logo */
+.links {
   display: flex;
-  gap: 2px;
-  margin: 0 auto;
-  padding: 4px 8px;
-  border-block: 1px solid var(--line);
-  background: color-mix(in srgb, var(--bg) 55%, transparent);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  gap: 4px;
 }
-.pill::before,
-.pill::after,
 .install::after {
   content: "";
   position: absolute;
@@ -180,17 +168,16 @@ function go(id: string) {
   background: var(--accent);
   box-shadow: 0 0 10px var(--accent);
 }
-.pill::before {
-  left: 0;
-}
-.pill::after,
 .install::after {
   right: 0;
 }
 .links a,
 .sheet a {
   position: relative;
-  padding: 6px 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 6px 10px;
   color: var(--text-2);
   font-family: var(--font-mono);
   font-size: 11px;
@@ -201,8 +188,8 @@ function go(id: string) {
 .links a::after {
   content: "";
   position: absolute;
-  left: 12px;
-  right: 12px;
+  left: 10px;
+  right: 10px;
   bottom: 2px;
   height: 1px;
   background: var(--accent);
@@ -217,7 +204,21 @@ function go(id: string) {
 .links a.on::after {
   transform: scaleX(1);
 }
+.arrow {
+  flex: none;
+  color: var(--muted);
+  transition:
+    transform var(--mid) var(--ease),
+    color var(--fast) var(--ease);
+}
+.links a:hover .arrow,
+.links a.on .arrow,
+.sheet a:hover .arrow {
+  color: var(--accent);
+  transform: translate(2px, -2px);
+}
 .end {
+  margin-left: auto;
   display: flex;
   align-items: center;
   gap: 4px;
@@ -272,9 +273,6 @@ function go(id: string) {
 @media (max-width: 900px) {
   .links {
     display: none;
-  }
-  .end {
-    margin-left: auto;
   }
   .menu {
     display: grid;
