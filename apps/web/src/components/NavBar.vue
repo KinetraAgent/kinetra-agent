@@ -78,11 +78,11 @@ function go(id: string) {
         </a>
       </nav>
       <div class="end">
+        <a class="icon-btn hide-sm" :href="X_URL" target="_blank" rel="noopener" aria-label="KINETRA on X"><BrandIcon name="x" /></a>
         <button class="icon-btn" type="button" :aria-label="`Switch to ${theme === 'dark' ? 'light' : 'dark'} theme`" @click="toggleTheme">
           <Sun v-if="theme === 'dark'" :size="18" :stroke-width="1.5" />
           <Moon v-else :size="18" :stroke-width="1.5" />
         </button>
-        <a class="icon-btn hide-sm" :href="X_URL" target="_blank" rel="noopener" aria-label="KINETRA on X"><BrandIcon name="x" /></a>
         <button class="install chip mono" type="button" data-cursor="install" @click="go('install')">
           Install
           <span class="badge" :title="'Latest block, last three digits'"><RollingNumber :value="tick" /></span>
