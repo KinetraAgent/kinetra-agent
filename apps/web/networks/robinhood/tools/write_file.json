@@ -1,0 +1,21 @@
+{
+  "name": "write_file",
+  "description": "Create a file or replace its whole content. Prefer edit_file for small changes.",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "path": {
+        "type": "string"
+      },
+      "content": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "path",
+      "content"
+    ]
+  },
+  "approval": "edit",
+  "version": "1.0.0"
+}

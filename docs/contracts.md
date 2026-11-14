@@ -42,6 +42,8 @@ pnpm seed:testnet     # notarizes the CLI tarball, registers tools, writes insta
 pnpm verify:testnet   # verifies source on Blockscout
 ```
 
+Mainnet uses the same steps with `deploy:mainnet`, `seed:mainnet` and `verify:mainnet`. Seed refuses to notarize a release until the tarball on GitHub Releases hashes to the local build, and writes `install.sh` and tool manifests to `apps/web/networks/<network>/`.
+
 Check the live testnet deployment end to end from the repo root:
 
 ```sh

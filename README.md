@@ -6,7 +6,7 @@
 <p align="center"><b>From Intent to Execution.</b><br/>A terminal AI agent that reads your code, writes the change, runs the commands and asks before anything lands. Releases are notarized on Robinhood Chain.</p>
 
 <p align="center">
-  <a href="https://testnet.kinetraagent.tech">testnet.kinetraagent.tech</a> ·
+  <a href="https://kinetraagent.tech">kinetraagent.tech</a> ·
   <a href="https://x.com/KinetraAgent">@KinetraAgent</a> ·
   <a href="docs/getting-started.md">Docs</a> ·
   $KNTR
@@ -15,7 +15,7 @@
 ## Install
 
 ```sh
-curl -fsSL https://testnet.kinetraagent.tech/install.sh | sh
+curl -fsSL https://kinetraagent.tech/install.sh | sh
 ```
 
 The installer reads the latest release from `KinetraReleaseRegistry` on Robinhood Chain, hashes the downloaded package and installs it only when the sha256 matches. Needs Node.js 22 or newer. On Windows, install the tarball from the [latest release](https://github.com/KinetraAgent/kinetra-agent/releases) with `npm install -g <url>`.
@@ -60,12 +60,12 @@ pnpm dev:web
 
 ## Contracts on Robinhood Chain
 
-| Contract | Role |
-|---|---|
-| KinetraReleaseRegistry | sha256 checksum and download URI of every CLI release |
-| KinetraToolRegistry | tool names, manifest URIs and manifest hashes, with a verified flag |
+| Contract | Role | Mainnet (chain 4663) |
+|---|---|---|
+| KinetraReleaseRegistry | sha256 checksum and download URI of every CLI release | [`0x2517471D5878BeDA99A4247f963dD95611Ec01b1`](https://robinhoodchain.blockscout.com/address/0x2517471D5878BeDA99A4247f963dD95611Ec01b1?tab=contract) |
+| KinetraToolRegistry | tool names, manifest URIs and manifest hashes, with a verified flag | [`0x969EB253e4D6c243D57971005B94625D63Efc08A`](https://robinhoodchain.blockscout.com/address/0x969EB253e4D6c243D57971005B94625D63Efc08A?tab=contract) |
 
-Both are UUPS upgradeable (ERC-1967) and verified on Blockscout. Addresses live in [`packages/contracts/deployments`](packages/contracts/deployments) and on the site. See [docs/contracts.md](docs/contracts.md).
+Both are UUPS upgradeable (ERC-1967) and source verified (Sourcify exact match, Blockscout). Addresses live in [`packages/contracts/deployments`](packages/contracts/deployments) and on the site. See [docs/contracts.md](docs/contracts.md).
 
 ## Roadmap
 
