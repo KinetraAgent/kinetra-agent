@@ -2,13 +2,13 @@
 import { Check, Copy } from "lucide-vue-next";
 import { useCopy } from "../lib/copy";
 
-defineProps<{ command: string }>();
+withDefaults(defineProps<{ command: string; prompt?: string }>(), { prompt: "$" });
 const { copied, copy } = useCopy();
 </script>
 
 <template>
   <button type="button" class="cmd mono" :class="{ copied }" :aria-label="`Copy: ${command}`" @click="copy(command)">
-    <span class="prompt">$</span>
+    <span class="prompt">{{ prompt }}</span>
     <span class="text">{{ command }}</span>
     <span class="key">
       <Check v-if="copied" :size="14" :stroke-width="1.5" />

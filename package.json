@@ -11,6 +11,7 @@
     "build": "pnpm -r build",
     "test": "pnpm -r test",
     "dev:web": "pnpm --filter @kinetra/web dev",
-    "kinetra-testnet:verify": "node --disable-warning=ExperimentalWarning packages/contracts/scripts/testnet-verify.mts"
+    "kinetra-testnet:verify": "node --disable-warning=ExperimentalWarning packages/contracts/scripts/testnet-verify.mts",
+    "mainnet:verify": "node --disable-warning=ExperimentalWarning packages/contracts/scripts/mainnet-verify.mts"
   }
 }

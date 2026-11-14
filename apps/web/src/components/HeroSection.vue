@@ -2,7 +2,7 @@
 import { ArrowDown } from "lucide-vue-next";
 import { computed, onBeforeUnmount, onMounted, ref } from "vue";
 import { CHAIN_NAME, deployment, fmt, live } from "../lib/chain";
-import { INSTALL_SH } from "../lib/links";
+import { INSTALL_SH, KNTR_CA } from "../lib/links";
 import { gsap, introDone, reduced, scrollToId, scrollToY } from "../lib/motion";
 import { decoder } from "../lib/scramble";
 import type { KinetraSphere } from "../lib/sphere";
@@ -157,6 +157,7 @@ onBeforeUnmount(() => {
         </p>
         <div class="actions">
           <InstallCommand :command="INSTALL_SH" />
+          <InstallCommand v-if="KNTR_CA" :command="KNTR_CA" prompt="$KNTR CA" />
           <button class="split" type="button" data-magnetic @click="scrollToId('arcade')">
             <span class="lbl">Play the execution demo</span>
             <span class="arr"><ArrowDown :size="16" :stroke-width="1.75" /></span>
