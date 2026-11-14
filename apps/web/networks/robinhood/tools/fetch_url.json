@@ -1,0 +1,17 @@
+{
+  "name": "fetch_url",
+  "description": "Fetch a web page or API over HTTP GET and return it as text, HTML reduced to readable text.",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "url": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "url"
+    ]
+  },
+  "approval": "exec",
+  "version": "2.0.0"
+}

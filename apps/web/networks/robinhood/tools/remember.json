@@ -13,6 +13,10 @@
           "project",
           "global"
         ]
+      },
+      "topic": {
+        "type": "string",
+        "description": "Section to file it under, e.g. build, style, architecture"
       }
     },
     "required": [
@@ -20,5 +24,5 @@
     ]
   },
   "approval": "none",
-  "version": "1.0.0"
+  "version": "2.0.0"
 }

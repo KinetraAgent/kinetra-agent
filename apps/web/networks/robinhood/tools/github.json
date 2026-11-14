@@ -1,0 +1,32 @@
+{
+  "name": "github",
+  "description": "Call the GitHub REST API, e.g. GET /repos/{repo}/pulls, POST /repos/{repo}/issues. {repo} is this project's origin remote. Uses GITHUB_TOKEN or the gh CLI login.",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "method": {
+        "type": "string",
+        "enum": [
+          "GET",
+          "POST",
+          "PATCH",
+          "PUT",
+          "DELETE"
+        ]
+      },
+      "path": {
+        "type": "string",
+        "description": "API path starting with /"
+      },
+      "body": {
+        "type": "object",
+        "description": "JSON body for POST, PATCH and PUT"
+      }
+    },
+    "required": [
+      "path"
+    ]
+  },
+  "approval": "none",
+  "version": "2.0.0"
+}

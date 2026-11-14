@@ -1,0 +1,18 @@
+{
+  "name": "recall",
+  "description": "Search memory and earlier sessions in this project for something the user or you said before. Use it when the user refers to past work or a decision you do not see in context.",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "query": {
+        "type": "string",
+        "description": "Words to look for"
+      }
+    },
+    "required": [
+      "query"
+    ]
+  },
+  "approval": "none",
+  "version": "2.0.0"
+}
