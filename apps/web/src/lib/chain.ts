@@ -23,6 +23,8 @@ export const TESTNET = deployment.chainId === 46630;
 export const EXPLORER = TESTNET ? "https://explorer.testnet.chain.robinhood.com" : "https://robinhoodchain.blockscout.com";
 const PUBLIC_RPC = TESTNET ? "https://rpc.testnet.chain.robinhood.com" : "https://rpc.mainnet.chain.robinhood.com";
 export const CHAIN_NAME = TESTNET ? "Robinhood Chain Testnet" : "Robinhood Chain";
+/** CLI version notarized on this network, as the seed script recorded it. */
+export const VERSION = deployment.release?.version ?? "1.0.0";
 
 const chain = defineChain({
   id: deployment.chainId,

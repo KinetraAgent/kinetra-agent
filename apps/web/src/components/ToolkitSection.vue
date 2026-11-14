@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { BadgeCheck, Check, CirclePause, CirclePlay, Copy, ExternalLink, X } from "lucide-vue-next";
 import { computed, ref } from "vue";
-import { live, short } from "../lib/chain";
+import { live, short, VERSION } from "../lib/chain";
 import { useCopy } from "../lib/copy";
 import Keycap from "./Keycap.vue";
 
@@ -117,7 +117,7 @@ const DEFAULT_MEMORY = ["uses pnpm, never npm", "tests sit next to source as *.t
           </div>
           <div class="screen fill">
             <p><span class="ink">$</span> kinetra --provider {{ provider.name }}</p>
-            <p class="ac">◢◤ K I N E T R A <span class="mute">v1.0.0-testnet.1</span></p>
+            <p class="ac">◢◤ K I N E T R A <span class="mute">v{{ VERSION }}</span></p>
             <p>
               <span class="ac">●</span> {{ provider.name }}/{{ provider.model }}
               <span class="mute">· {{ provider.key ? `key from ${provider.key}` : "local, no key needed" }}</span>

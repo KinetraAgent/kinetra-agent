@@ -2,6 +2,7 @@
 import { Award, CornerDownLeft, Lock, ShieldAlert } from "lucide-vue-next";
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref } from "vue";
 import { BADGES, customMission, MISSIONS, type Mission } from "../lib/arcade";
+import { VERSION } from "../lib/chain";
 import Keycap from "./Keycap.vue";
 
 type Answer = "yes" | "no" | "always";
@@ -218,7 +219,7 @@ const seconds = computed(() => (stats.elapsed / 1000).toFixed(1));
 
           <div ref="body" class="term-body mono" data-lenis-prevent aria-live="polite">
             <div v-if="!lines.length" class="idle">
-              <p class="logo">◢◤ K I N E T R A <span>v1.0.0-testnet.1</span></p>
+              <p class="logo">◢◤ K I N E T R A <span>v{{ VERSION }}</span></p>
               <p class="faint">from intent to execution</p>
               <p><span class="accent">●</span> anthropic/claude-opus-5-5 · mode {{ mode }} · /help</p>
               <p class="faint">› pick a mission on the right, press 1, 2 or 3, or type your own intent below</p>

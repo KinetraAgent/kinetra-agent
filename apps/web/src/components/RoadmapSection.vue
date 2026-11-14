@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Check, Lock } from "lucide-vue-next";
 import { ref } from "vue";
+import { TESTNET } from "../lib/chain";
 import { X_URL } from "../lib/links";
 
 const LEVELS = [
@@ -9,7 +10,7 @@ const LEVELS = [
     name: "Genesis",
     version: "v1.0",
     era: "The Execution Era",
-    status: "testnet live",
+    status: TESTNET ? "testnet live" : "mainnet live",
     features: [
       { t: "KINETRA CLI Agent", d: "A lightweight terminal-based AI agent that understands and executes user instructions." },
       { t: "Multi-Model Support", d: "Connect multiple AI model providers using your own API keys (BYOK)." },
@@ -114,8 +115,8 @@ const selected = ref(LEVELS[0]);
             <p class="era">{{ selected.name }}: {{ selected.era }}</p>
             <div v-if="selected.n === 1" class="track mono">
               <span class="done"><Check :size="14" :stroke-width="1.5" /> testnet</span>
-              <span class="bar"><span></span></span>
-              <span>V1.0 mainnet + $KNTR</span>
+              <span class="bar" :class="{ full: !TESTNET }"><span></span></span>
+              <span :class="{ done: !TESTNET }"><Check v-if="!TESTNET" :size="14" :stroke-width="1.5" /> V1.0 mainnet + $KNTR</span>
             </div>
           </header>
           <ul :key="selected.n" class="features">
@@ -266,6 +267,10 @@ const selected = ref(LEVELS[0]);
   background: linear-gradient(90deg, var(--blue), var(--accent));
   box-shadow: 0 0 10px var(--accent);
   animation: charge 2.4s var(--ease) infinite alternate;
+}
+.bar.full span {
+  width: 100%;
+  animation: none;
 }
 @keyframes charge {
   from {

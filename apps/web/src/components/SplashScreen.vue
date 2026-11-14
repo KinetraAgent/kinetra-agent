@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from "vue";
-import { CHAIN_NAME, fmt, live, short } from "../lib/chain";
+import { CHAIN_NAME, fmt, live, short, VERSION } from "../lib/chain";
 import { gsap, intro, introDone, lockScroll, reduced, sceneReady } from "../lib/motion";
 import Keycap from "./Keycap.vue";
 
@@ -185,7 +185,7 @@ onBeforeUnmount(() => {
     <div ref="ui" class="ui">
       <header class="top">
         <span class="brand"><img src="/logo-96.webp" width="24" height="24" alt="" />KINETRA</span>
-        <span class="mono meta">v1.0.0-testnet.1 · {{ CHAIN_NAME }}</span>
+        <span class="mono meta">v{{ VERSION }} · {{ CHAIN_NAME }}</span>
       </header>
 
       <ol class="boot mono" aria-live="polite">

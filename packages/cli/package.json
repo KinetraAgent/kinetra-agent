@@ -1,6 +1,6 @@
 {
   "name": "@kinetra/cli",
-  "version": "1.0.0-testnet.1",
+  "version": "1.0.0",
   "description": "KINETRA: the terminal agent that turns intent into execution.",
   "license": "MIT",
   "type": "module",
