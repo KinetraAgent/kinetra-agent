@@ -1,13 +1,32 @@
 import { shallowReactive } from "vue";
-import { createPublicClient, defineChain, fallback, http, parseAbi, type Hex } from "viem";
+import { createPublicClient, defineChain, fallback, formatEther, http, parseAbi, type Hex } from "viem";
 
 interface Deployment {
   network: string;
   chainId: number;
-  contracts: Record<string, { proxy: Hex; implementation: Hex; block: number; verified?: boolean }>;
+  contracts: Record<string, { proxy?: Hex; beacon?: Hex; implementation: Hex; block: number; verified?: boolean }>;
   // snapshot written by scripts/seed.ts, shown until the live read lands
   release?: { version: string; checksum: Hex; uri: string; publishedAt: number };
   tools?: { name: string; manifestURI: string; manifestHash: Hex; verified: boolean }[];
+  nexus?: NexusSnapshot;
+}
+
+/** Nexus market state; scripts/seed.ts writes a snapshot, the live read replaces it. */
+export interface NexusSnapshot {
+  stats: { agents: number; services: number; jobs: number; completed: number; wallets: number; volumeEth: string };
+  services: NexusService[];
+  lastJob: { id: number; serviceId: number; amount: string; asset: string; rating: number; createdAt: number; deliveredAt: number; status: string } | null;
+}
+export interface NexusService {
+  id: number;
+  title: string;
+  details: string;
+  provider: string;
+  rating: number | null;
+  price: string;
+  asset: string;
+  active: boolean;
+  jobs: number;
 }
 
 const NETWORK = import.meta.env.VITE_NETWORK ?? "robinhoodTestnet";
@@ -47,18 +66,25 @@ const toolAbi = parseAbi([
   "function tools(uint256 offset, uint256 limit) view returns (Tool[])",
 ]);
 
-export const CONTRACTS = [
-  {
-    name: "KinetraReleaseRegistry",
-    role: "Notarizes every CLI build. The installer refuses a package whose sha256 differs from the one stored here",
-    ...deployment.contracts.KinetraReleaseRegistry,
-  },
-  {
-    name: "KinetraToolRegistry",
-    role: "Public index of agent tools with their manifest hashes. Reviewed tools carry a verified flag",
-    ...deployment.contracts.KinetraToolRegistry,
-  },
-];
+const ROLES: Record<string, string> = {
+  KinetraReleaseRegistry: "Notarizes every CLI build. The installer refuses a package whose sha256 differs from the one stored here",
+  KinetraToolRegistry: "Public index of agent tools with their manifest hashes. Reviewed tools carry a verified flag",
+  KinetraAgentRegistry: "Onchain agent identity: unique names, payout address, jobs completed and ratings from settled work",
+  KinetraServiceMarket: "Agents list services, clients hire them. ETH or $KNTR sits in escrow until the delivery is accepted",
+  KinetraAgentWallet: "Smart wallet for an agent. Per-payment and daily limits, expiring keys, an allowlist of contracts",
+  KinetraWalletFactory: "Deploys agent wallets at deterministic addresses, every setting baked into the address",
+};
+
+export const CONTRACTS = Object.entries(deployment.contracts)
+  .filter(([name]) => ROLES[name])
+  .map(([name, c]) => ({
+    name,
+    role: ROLES[name],
+    address: (c.proxy ?? c.beacon)!,
+    pattern: c.beacon ? "Beacon · BeaconProxy" : "UUPS · ERC-1967",
+    ...c,
+  }));
+const at = (name: string) => CONTRACTS.find((c) => c.name === name)?.address;
 
 export interface Tool {
   name: string;
@@ -73,7 +99,51 @@ export const live = shallowReactive({
   releaseCount: null as number | null,
   tools: (deployment.tools ?? []).map((t) => ({ ...t, verified: true })) as Tool[],
   tx: { mode: "days" as "days" | "blocks", points: [] as TxPoint[] },
+  nexus: deployment.nexus ?? null,
 });
+
+const assetName = (a: string) => (/^0x0{40}$/i.test(a) ? "ETH" : KNTR && a.toLowerCase() === KNTR.toLowerCase() ? "KNTR" : "token");
+
+async function readNexus() {
+  if (!agentsAt || !marketAt || !factoryAt) return;
+  const read = (address: Hex, abi: any, functionName: string, args: unknown[] = []) => client.readContract({ address, abi, functionName, args } as any) as Promise<any>;
+  const [agentCount, agents, services, jobs, completed, volumeEth, wallets] = await Promise.all([
+    read(agentsAt, agentAbi, "agentCount"),
+    read(agentsAt, agentAbi, "agents", [0n, 100n]),
+    read(marketAt, marketAbi, "services", [0n, 100n]),
+    read(marketAt, marketAbi, "jobCount"),
+    read(marketAt, marketAbi, "completedJobs"),
+    read(marketAt, marketAbi, "volume", ["0x0000000000000000000000000000000000000000"]),
+    read(factoryAt, factoryAbi, "walletCount"),
+  ]);
+  const byAccount = new Map<string, any>((agents as any[]).map((a) => [a.account.toLowerCase(), a]));
+  let lastJob: NexusSnapshot["lastJob"] = null;
+  // the newest settled job drives the lifecycle view
+  for (let id = Number(jobs) - 1; id >= Math.max(0, Number(jobs) - 20); id--) {
+    const j = await read(marketAt, marketAbi, "job", [BigInt(id)]);
+    if (j.status !== 3) continue;
+    lastJob = { id, serviceId: Number(j.serviceId), amount: formatEther(j.amount), asset: assetName(j.asset), rating: Number(j.rating), createdAt: Number(j.createdAt), deliveredAt: Number(j.deliveredAt), status: JOB_STATUS[j.status] };
+    break;
+  }
+  live.nexus = {
+    stats: { agents: Number(agentCount), services: services.length, jobs: Number(jobs), completed: Number(completed), wallets: Number(wallets), volumeEth: formatEther(volumeEth) },
+    services: (services as any[]).map((s, id) => {
+      const a = byAccount.get(s.provider.toLowerCase());
+      return {
+        id,
+        title: s.title,
+        details: s.details,
+        provider: a?.name ?? "agent",
+        rating: a?.ratingCount ? Math.round((Number(a.ratingSum) / a.ratingCount) * 10) / 10 : null,
+        price: formatEther(s.price),
+        asset: assetName(s.asset),
+        active: s.active,
+        jobs: Number(s.jobs),
+      };
+    }),
+    lastJob: lastJob ?? live.nexus?.lastJob ?? null,
+  };
+}
 
 /** One chart point: `label` on the axis, `title` in the tooltip. */
 export interface TxPoint {
@@ -83,8 +153,30 @@ export interface TxPoint {
   count: number;
 }
 
-const releaseAt = CONTRACTS[0].proxy;
-const toolsAt = CONTRACTS[1].proxy;
+const releaseAt = at("KinetraReleaseRegistry")!;
+const toolsAt = at("KinetraToolRegistry")!;
+const agentsAt = at("KinetraAgentRegistry");
+const marketAt = at("KinetraServiceMarket");
+const factoryAt = at("KinetraWalletFactory");
+export const KNTR = (deployment as { kntr?: Hex | null }).kntr ?? null;
+
+const agentAbi = parseAbi([
+  "struct Agent { address account; string name; string metadataURI; address payout; uint64 registeredAt; uint32 jobsCompleted; uint32 ratingCount; uint64 ratingSum; }",
+  "function agentCount() view returns (uint256)",
+  "function agents(uint256 offset, uint256 limit) view returns (Agent[])",
+]);
+const marketAbi = parseAbi([
+  "struct Service { address provider; string title; string details; address asset; uint256 price; bool active; uint64 listedAt; uint32 jobs; }",
+  "struct Job { uint256 serviceId; address client; address provider; address asset; uint256 amount; uint8 status; uint8 rating; uint64 createdAt; uint64 deliveredAt; string brief; string result; }",
+  "function serviceCount() view returns (uint256)",
+  "function services(uint256 offset, uint256 limit) view returns (Service[])",
+  "function jobCount() view returns (uint256)",
+  "function job(uint256 id) view returns (Job)",
+  "function completedJobs() view returns (uint256)",
+  "function volume(address asset) view returns (uint256)",
+]);
+const factoryAbi = parseAbi(["function walletCount() view returns (uint256)"]);
+const JOB_STATUS = ["none", "open", "delivered", "completed", "refunded"];
 
 async function readRegistries() {
   const [latest, count, tools] = await Promise.all([
@@ -143,6 +235,7 @@ export function startLive() {
   if (started) return;
   started = true;
   readRegistries().catch(() => {});
+  readNexus().catch(() => {});
   readTxChart().catch(() => {});
   const tick = () => {
     if (document.visibilityState === "visible") {

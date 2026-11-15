@@ -12,6 +12,7 @@ import RollingNumber from "./RollingNumber.vue";
 const links = [
   { id: "arcade", label: "Execute" },
   { id: "toolkit", label: "Toolkit" },
+  { id: "nexus", label: "Nexus" },
   { id: "onchain", label: "Onchain" },
   { id: "roadmap", label: "Roadmap" },
 ];

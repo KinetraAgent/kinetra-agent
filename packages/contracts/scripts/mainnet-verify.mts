@@ -19,11 +19,27 @@ const IMPL_SLOT = "0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d3
 const CONTRACTS = [
   { name: "KinetraReleaseRegistry", role: "notarizes every CLI build", ...deployment.contracts.KinetraReleaseRegistry },
   { name: "KinetraToolRegistry", role: "public index of agent tools", ...deployment.contracts.KinetraToolRegistry },
-];
+  { name: "KinetraAgentRegistry", role: "onchain agent identity and reputation", ...deployment.contracts.KinetraAgentRegistry },
+  { name: "KinetraServiceMarket", role: "agent services and job escrow", ...deployment.contracts.KinetraServiceMarket },
+  // a beacon, not a proxy: every agent wallet is a BeaconProxy that reads its implementation from here
+  { name: "KinetraAgentWallet", role: "smart wallets with agent spending limits", ...deployment.contracts.KinetraAgentWallet, proxy: deployment.contracts.KinetraAgentWallet.beacon },
+  { name: "KinetraWalletFactory", role: "deploys agent wallets", ...deployment.contracts.KinetraWalletFactory },
+] as { name: string; role: string; proxy: string; implementation: string; beacon?: string }[];
 
 const releaseAbi = new Interface([
   "function latest() view returns (string version, bytes32 checksum, string uri, uint64 publishedAt)",
   "function releaseCount() view returns (uint256)",
+]);
+const nexusAbi = new Interface([
+  "function agentCount() view returns (uint256)",
+  "function market() view returns (address)",
+  "function registry() view returns (address)",
+  "function serviceCount() view returns (uint256)",
+  "function completedJobs() view returns (uint256)",
+  "function implementation() view returns (address)",
+  "function beacon() view returns (address)",
+  "function defaultTarget() view returns (address)",
+  "function walletCount() view returns (uint256)",
 ]);
 const toolAbi = new Interface([
   "function tools(uint256 offset, uint256 limit) view returns ((address author, string name, string manifestURI, bytes32 manifestHash, bool verified, uint64 registeredAt)[])",
@@ -208,8 +224,10 @@ async function checkContract(ct: (typeof CONTRACTS)[number], liveLabel: string, 
     if (logic.length <= 2) throw new Error("no code at the implementation address");
     return `${fmt(proxy.length / 2 - 1)} B proxy · ${fmt(logic.length / 2 - 1)} B logic`;
   });
-  await step("ERC-1967 slot → implementation", async () => {
-    const impl = "0x" + (await rpc("eth_getStorageAt", [ct.proxy, IMPL_SLOT, "latest"])).slice(-40);
+  await step(ct.beacon ? "beacon → implementation" : "ERC-1967 slot → implementation", async () => {
+    const impl = ct.beacon
+      ? String((await call(ct.proxy, nexusAbi, "implementation"))[0])
+      : "0x" + (await rpc("eth_getStorageAt", [ct.proxy, IMPL_SLOT, "latest"])).slice(-40);
     if (impl.toLowerCase() !== ct.implementation.toLowerCase()) throw new Error(`slot points to ${impl}, not ${ct.implementation}`);
     return `${short(ct.implementation)} ${c.dim("matches deployment")}`;
   });
@@ -230,7 +248,7 @@ async function checkContract(ct: (typeof CONTRACTS)[number], liveLabel: string, 
   const row = (k: string, v: string) => out(`    ${c.violet("│")} ${c.dim(k.padEnd(15))} ${v}\n`);
   out(`\n    ${c.violet("┌")} ${c.bold(ct.name)}  ${verified ? c.green("● VERIFIED & PUBLISHED") : c.red("● NOT VERIFIED")}\n`);
   row("role", ct.role);
-  row("standard", "UUPS · ERC-1967 proxy");
+  row("standard", ct.beacon ? "UpgradeableBeacon · BeaconProxy wallets" : "UUPS · ERC-1967 proxy");
   row("address", c.bold(ct.proxy));
   row("implementation", ct.implementation);
   row("explorer", link(explorerUrl(ct.proxy)));
@@ -295,7 +313,36 @@ async function main() {
     }),
   );
 
-  await section("04", "PROOF", "re-hash what the contracts notarize");
+  const nexus = Object.fromEntries(CONTRACTS.slice(2).map((ct) => [ct.name, ct]));
+  const n = (k: string, fn: string) => call(nexus[k].proxy, nexusAbi, fn).then((r) => r[0]);
+  const same = (a: unknown, b: string, what: string) => {
+    if (String(a).toLowerCase() !== b.toLowerCase()) throw new Error(`${what} points to ${a}`);
+  };
+  const LIVE: Record<string, [string, () => Promise<string>]> = {
+    KinetraAgentRegistry: ["live read · agentCount(), market()", async () => {
+      same(await n("KinetraAgentRegistry", "market"), nexus.KinetraServiceMarket.proxy, "market");
+      return `${await n("KinetraAgentRegistry", "agentCount")} agents · ${c.dim("records jobs from KinetraServiceMarket")}`;
+    }],
+    KinetraServiceMarket: ["live read · serviceCount(), registry()", async () => {
+      same(await n("KinetraServiceMarket", "registry"), nexus.KinetraAgentRegistry.proxy, "registry");
+      return `${await n("KinetraServiceMarket", "serviceCount")} services · ${await n("KinetraServiceMarket", "completedJobs")} jobs settled`;
+    }],
+    KinetraAgentWallet: ["live read · factory.beacon()", async () => {
+      same(await n("KinetraWalletFactory", "beacon"), nexus.KinetraAgentWallet.proxy, "factory beacon");
+      return `KinetraWalletFactory builds on this beacon`;
+    }],
+    KinetraWalletFactory: ["live read · walletCount(), defaultTarget()", async () => {
+      same(await n("KinetraWalletFactory", "defaultTarget"), nexus.KinetraServiceMarket.proxy, "defaultTarget");
+      return `${await n("KinetraWalletFactory", "walletCount")} agent wallets · ${c.dim("market allowed by default")}`;
+    }],
+  };
+  await section("04", "NEXUS", "identity, market, wallets");
+  for (const ct of CONTRACTS.slice(2)) {
+    out(`\n    ${c.bold(ct.name)}  ${c.dim(ct.role)}\n`);
+    results.push(await checkContract(ct, ...LIVE[ct.name]));
+  }
+
+  await section("05", "PROOF", "re-hash what the contracts notarize");
   await step("release tarball = onchain sha256", async () => {
     if (!release) throw new Error("latest() was not read");
     const pkg = await download(release.uri, 120000);

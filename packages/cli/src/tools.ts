@@ -4,6 +4,7 @@ import { mkdir, readdir, readFile, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { loadMcpTools } from "./mcp.ts";
+import { nexusTool } from "./nexus.ts";
 import { HOME, listSessions, loadContext, remember, type Config } from "./store.ts";
 
 export interface ToolContext {
@@ -417,7 +418,7 @@ export async function githubRepo(root: string) {
 
 /** Built-in tools, the user's own tools in ~/.kinetra/tools/*.mjs and the tools of configured MCP servers. */
 export async function loadTools(onWarn: (msg: string) => void = console.error, config: Config = {}, version = ""): Promise<Tool[]> {
-  const tools = [...BUILTIN_TOOLS];
+  const tools = [...BUILTIN_TOOLS, nexusTool(version)];
   const dir = path.join(HOME, "tools");
   for (const tool of await loadMcpTools(config.mcpServers, version, onWarn)) {
     if (tools.some((t) => t.name === tool.name)) onWarn(`skipped MCP tool ${tool.name}: name taken`);

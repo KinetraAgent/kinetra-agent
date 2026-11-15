@@ -6,6 +6,7 @@ import CursorFx from "./components/CursorFx.vue";
 import HeroSection from "./components/HeroSection.vue";
 import InstallSection from "./components/InstallSection.vue";
 import MarqueeBand from "./components/MarqueeBand.vue";
+import NexusSection from "./components/NexusSection.vue";
 import NavBar from "./components/NavBar.vue";
 import OnchainSection from "./components/OnchainSection.vue";
 import RoadmapSection from "./components/RoadmapSection.vue";
@@ -21,6 +22,7 @@ const chain = computed(() => [
   live.release ? `release v${live.release.version}` : "release",
   live.release ? `sha256 ${short(live.release.checksum, 6, 4)}` : "sha256",
   `${live.tools.length} tools onchain`,
+  live.nexus?.stats.agents ? `${live.nexus.stats.agents} agents on Nexus` : "Nexus v3.0 live",
   "$KNTR with mainnet",
 ]);
 
@@ -44,6 +46,7 @@ onMounted(async () => {
     </div>
     <ArcadeSection />
     <ToolkitSection />
+    <NexusSection />
     <MarqueeBand :items="chain" reverse />
     <OnchainSection />
     <RoadmapSection />

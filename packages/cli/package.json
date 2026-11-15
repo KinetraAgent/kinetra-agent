@@ -1,7 +1,7 @@
 {
   "name": "@kinetra/cli",
   "version": "2.0.0",
-  "description": "KINETRA: the terminal agent that turns intent into execution.",
+  "description": "KINETRA: the terminal agent that turns intent into execution, and the SDK for KINETRA Nexus.",
   "license": "MIT",
   "type": "module",
   "bin": {
@@ -25,10 +25,18 @@
     "release": "pnpm build && pnpm pack"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^1.8.0"
+    "@anthropic-ai/sdk": "^1.8.0",
+    "viem": "^2.57.19"
   },
   "devDependencies": {
     "@types/node": "^24.19.2",
     "typescript": "^5.9.3"
+  },
+  "exports": {
+    "./sdk": {
+      "types": "./dist/sdk.d.ts",
+      "default": "./dist/sdk.js"
+    },
+    "./package.json": "./package.json"
   }
 }

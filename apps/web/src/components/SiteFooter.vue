@@ -38,7 +38,7 @@ function rest() {
       </nav>
       <nav aria-label="Onchain">
         <p class="h mono">onchain</p>
-        <a v-for="c in CONTRACTS" :key="c.name" :href="`${EXPLORER}/address/${c.proxy}`" target="_blank" rel="noopener">{{ c.name.replace("Kinetra", "") }}</a>
+        <a v-for="c in CONTRACTS" :key="c.name" :href="`${EXPLORER}/address/${c.address}`" target="_blank" rel="noopener">{{ c.name.replace("Kinetra", "") }}</a>
         <a :href="EXPLORER" target="_blank" rel="noopener">Explorer</a>
       </nav>
       <nav aria-label="Community">

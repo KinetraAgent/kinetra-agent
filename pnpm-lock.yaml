@@ -217,6 +217,9 @@ importers:
       '@anthropic-ai/sdk':
         specifier: ^1.8.0
         version: 1.8.0
+      viem:
+        specifier: ^2.57.19
+        version: 2.57.19(typescript@5.9.3)
     devDependencies:
       '@types/node':
         specifier: ^24.19.2

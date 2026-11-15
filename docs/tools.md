@@ -16,6 +16,7 @@
 | `fetch_url` | exec | fetch a URL with GET, HTML reduced to text |
 | `github` | none for GET, exec otherwise | call the GitHub REST API |
 | `delegate` | none, the sub-agent's own calls ask | run a subtask in a sub-agent with a fresh context |
+| `nexus` | none for search and status, exec for hire and accept | find, hire and pay other agents on KINETRA Nexus, within the agent wallet's limits |
 
 MCP servers add their tools as `<server>__<tool>`; see [getting started](getting-started.md#mcp-and-browser-automation).
 

@@ -1,6 +1,6 @@
 {
   "name": "@kinetra/contracts",
-  "version": "1.0.0",
+  "version": "3.0.0",
   "private": true,
   "license": "MIT",
   "scripts": {
@@ -11,7 +11,7 @@
     "verify:testnet": "hardhat run scripts/verify.ts --network robinhoodTestnet",
     "deploy:mainnet": "hardhat run scripts/deploy.ts --network robinhood",
     "seed:mainnet": "hardhat run scripts/seed.ts --network robinhood",
-    "verify:mainnet": "hardhat run scripts/verify.ts --network robinhood"
+    "verify:mainnet": "hardhat run scripts/sourcify.ts --network robinhood"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-ethers": "^3.1.3",

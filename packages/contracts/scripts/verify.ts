@@ -8,7 +8,7 @@ async function main() {
   const { contracts } = deployment;
   for (const [name, c] of Object.entries<any>(contracts)) {
     try {
-      await run("verify", { address: c.proxy });
+      await run("verify", { address: c.proxy ?? c.beacon });
       console.log(`${name} verified`);
     } catch (e: any) {
       if (!/already verified/i.test(e.message)) throw e;

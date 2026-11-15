@@ -6,6 +6,7 @@
     "strict": true,
     "outDir": "dist",
     "rootDir": "src",
+    "declaration": true,
     "rewriteRelativeImportExtensions": true,
     "erasableSyntaxOnly": true,
     "verbatimModuleSyntax": true,

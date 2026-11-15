@@ -32,9 +32,9 @@ const tarball = computed(() => live.release?.uri.split("/").pop() ?? "");
 <template>
   <section id="onchain" class="section onchain">
     <div class="wrap">
-      <div class="section-head reveal" data-n="03">
+      <div class="section-head reveal" data-n="04">
         <div>
-          <p class="kicker mono"><b>03</b> onchain · {{ CHAIN_NAME }}</p>
+          <p class="kicker mono"><b>04</b> onchain · {{ CHAIN_NAME }}</p>
           <h2 class="h2">Every release, notarized on Robinhood Chain</h2>
         </div>
         <p class="lede">
@@ -107,7 +107,7 @@ const tarball = computed(() => live.release?.uri.split("/").pop() ?? "");
         <div class="table" role="table" aria-label="KINETRA smart contracts">
           <div class="tr th mono" role="row">
             <span role="columnheader">Contract</span>
-            <span role="columnheader">Proxy address</span>
+            <span role="columnheader">Address</span>
             <span role="columnheader">Implementation</span>
             <span role="columnheader">Pattern</span>
             <span role="columnheader">Source</span>
@@ -118,16 +118,16 @@ const tarball = computed(() => live.release?.uri.split("/").pop() ?? "");
               <p class="sub">{{ c.role }}</p>
             </div>
             <div role="cell" class="addr mono">
-              <a :href="`${EXPLORER}/address/${c.proxy}`" target="_blank" rel="noopener">{{ short(c.proxy, 8, 6) }} <ExternalLink :size="14" :stroke-width="1.5" /></a>
-              <button type="button" :aria-label="`Copy ${c.name} address`" @click="copyAddr(c.proxy)">
-                <Check v-if="copiedAddr === c.proxy" :size="14" :stroke-width="1.5" />
+              <a :href="`${EXPLORER}/address/${c.address}`" target="_blank" rel="noopener">{{ short(c.address, 8, 6) }} <ExternalLink :size="14" :stroke-width="1.5" /></a>
+              <button type="button" :aria-label="`Copy ${c.name} address`" @click="copyAddr(c.address)">
+                <Check v-if="copiedAddr === c.address" :size="14" :stroke-width="1.5" />
                 <Copy v-else :size="14" :stroke-width="1.5" />
               </button>
             </div>
             <div role="cell" class="addr mono">
               <a :href="`${EXPLORER}/address/${c.implementation}?tab=contract`" target="_blank" rel="noopener">{{ short(c.implementation, 8, 6) }} <ExternalLink :size="14" :stroke-width="1.5" /></a>
             </div>
-            <div role="cell" class="mono pattern">UUPS · ERC-1967</div>
+            <div role="cell" class="mono pattern">{{ c.pattern }}</div>
             <div role="cell" class="mono">
               <a v-if="c.verified" class="ok" :href="`${EXPLORER}/address/${c.implementation}?tab=contract`" target="_blank" rel="noopener"><BadgeCheck :size="16" :stroke-width="1.5" /> verified</a>
               <span v-else class="sub">verifying</span>

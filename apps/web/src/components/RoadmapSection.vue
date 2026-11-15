@@ -32,7 +32,7 @@ const LEVELS = [
     name: "Relay",
     version: "v2.0",
     era: "Connected Intelligence",
-    status: TESTNET ? "testnet live" : "mainnet live",
+    status: "mainnet live",
     features: [
       { t: "Web Dashboard", d: "Manage agent sessions, tasks, settings and execution history." },
       { t: "MCP Integration", d: "Connect external tools and services through Model Context Protocol." },
@@ -53,7 +53,7 @@ const LEVELS = [
     name: "Nexus",
     version: "v3.0",
     era: "The Autonomous Economy",
-    status: "unlocks after Relay",
+    status: TESTNET ? "testnet live" : "mainnet live",
     features: [
       { t: "KINETRA Agent Marketplace", d: "Discover, publish and access specialized AI agents." },
       { t: "Agent-to-Agent Communication", d: "Autonomous agents collaborate and delegate tasks to each other." },
@@ -71,7 +71,7 @@ const LEVELS = [
   },
 ];
 /** the level being shipped now; earlier levels are done */
-const CURRENT = 2;
+const CURRENT = 3;
 const selected = ref(LEVELS[CURRENT - 1]);
 // the current level is done once it is on mainnet; earlier ones always are
 const shipped = computed(() => selected.value.n < CURRENT || !TESTNET);
@@ -80,10 +80,10 @@ const shipped = computed(() => selected.value.n < CURRENT || !TESTNET);
 <template>
   <section id="roadmap" class="section roadmap">
     <div class="wrap">
-      <div class="section-head reveal" data-n="04">
+      <div class="section-head reveal" data-n="05">
         <div>
-          <p class="kicker mono"><b>04</b> roadmap</p>
-          <h2 class="h2">Three levels. Relay is in play.</h2>
+          <p class="kicker mono"><b>05</b> roadmap</p>
+          <h2 class="h2">Three levels. Nexus is live.</h2>
         </div>
         <p class="lede">
           It starts with one agent on your machine and grows into a network of agents that work, trade and pay each other on Robinhood
@@ -120,7 +120,7 @@ const shipped = computed(() => selected.value.n < CURRENT || !TESTNET);
             <div v-if="selected.n <= CURRENT" class="track mono">
               <span class="done"><Check :size="14" :stroke-width="1.5" /> testnet</span>
               <span class="bar" :class="{ full: shipped }"><span></span></span>
-              <span :class="{ done: shipped }"><Check v-if="shipped" :size="14" :stroke-width="1.5" /> {{ selected.n === 1 ? "V1.0 mainnet + $KNTR" : "V2.0 mainnet" }}</span>
+              <span :class="{ done: shipped }"><Check v-if="shipped" :size="14" :stroke-width="1.5" /> {{ selected.n === 1 ? "V1.0 mainnet + $KNTR" : `V${selected.n}.0 mainnet` }}</span>
             </div>
           </header>
           <ul :key="selected.n" class="features">

@@ -27,6 +27,8 @@ export interface AgentState {
   allowed: Set<string>;
   /** 1 inside a sub-agent, which cannot delegate again */
   depth?: number;
+  /** leave memory out of the prompt, for work done for outside clients */
+  noMemory?: boolean;
 }
 
 /** Runs a task in a fresh sub-agent that shares tools, mode and approvals; returns its last answer. */
@@ -54,8 +56,9 @@ async function delegate(s: AgentState, task: string, role: string | undefined, i
   return answer?.content || "the sub-agent finished without an answer";
 }
 
-export async function systemPrompt(root: string): Promise<string> {
+export async function systemPrompt(root: string, noMemory = false): Promise<string> {
   const ctx = await loadContext(root);
+  if (noMemory) ctx.globalMemory = ctx.projectMemory = "";
   let branch = "";
   try {
     branch = execFileSync("git", ["rev-parse", "--abbrev-ref", "HEAD"], { cwd: root, stdio: ["ignore", "pipe", "ignore"] })
@@ -135,7 +138,7 @@ export async function runTurn(s: AgentState, input: string, io: AgentIO, signal?
   const { session } = s;
   session.messages.push({ role: "user", content: input });
   session.title ||= input.slice(0, 80);
-  const system = await systemPrompt(s.root);
+  const system = await systemPrompt(s.root, s.noMemory);
 
   for (let step = 0; step < MAX_STEPS; step++) {
     io.busy(true);

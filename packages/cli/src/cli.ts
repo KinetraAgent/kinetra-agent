@@ -8,6 +8,7 @@ import { cronMatches, listWorkflows, loadSchedules, loadWorkflow, LOGS, runDaemo
 import { startDashboard } from "./dashboard.ts";
 import { closeMcp, MCP_PRESETS } from "./mcp.ts";
 import { PROVIDERS, resolveProvider, type Provider } from "./providers.ts";
+import { agentCommand, hireCommand, jobPrompt, jobsCommand, marketCommand, nexusFor, serve, serveTools, walletCommand } from "./nexus.ts";
 import { installTool } from "./registry.ts";
 import {
   listSessions,
@@ -56,6 +57,18 @@ ${c.bold("Relay")}
   kinetra dashboard [--port n]    sessions, usage and automation at http://127.0.0.1:7777
   kinetra usage                   tokens, requests and tool calls by model and day
 
+${c.bold("Nexus")}
+  kinetra wallet [new]            agent key, smart wallet, balances and spending limits
+  kinetra wallet create --owner <address> [--per-tx 0.01] [--per-day 0.05] [--days 30]
+                                  KinetraAgentWallet you own; this agent spends within its limits
+  kinetra agent register <name> [--about <url>]   onchain identity in KinetraAgentRegistry
+  kinetra agents [name]           agents with their reputation
+  kinetra market                  services for hire in KinetraServiceMarket
+  kinetra market add "<title>" --price <amount> [--kntr] [--about "<text>"]
+  kinetra hire <id> "<brief>" [--wait]   pay into escrow and hire another agent
+  kinetra jobs [id | accept <id> --rating 5 | cancel <id> | decline <id>]
+  kinetra serve                   deliver jobs for your services with this agent; runs headless in KINETRA Cloud
+
 ${c.bold("Options")}
   -m, --mode <ask|edits|auto>  ask: approve edits and commands (default)
                                edits: edits run, commands ask
@@ -95,6 +108,16 @@ async function main() {
       provider: { type: "string" },
       model: { type: "string" },
       json: { type: "boolean" },
+      owner: { type: "string" },
+      "per-tx": { type: "string" },
+      "per-day": { type: "string" },
+      days: { type: "string" },
+      about: { type: "string" },
+      payout: { type: "string" },
+      price: { type: "string" },
+      kntr: { type: "boolean" },
+      rating: { type: "string" },
+      wait: { type: "boolean" },
       help: { type: "boolean", short: "h" },
       version: { type: "boolean", short: "v" },
     },
@@ -125,8 +148,20 @@ async function main() {
       const { url } = await startDashboard(root, Number(values.port ?? 7777), VERSION);
       return console.log(`dashboard on ${c.cyan(url)} ${c.dim("· Ctrl+C stops it")}`);
     }
+    case "wallet":
+      return walletCommand(VERSION, rest, values, rest.slice(1));
+    case "agent":
+    case "agents":
+      return agentCommand(VERSION, cmd, rest, values);
+    case "market":
+      return marketCommand(VERSION, rest, values);
+    case "hire":
+      return hireCommand(VERSION, rest, values);
+    case "jobs":
+      return jobsCommand(VERSION, rest, values);
     case "run":
     case "telegram":
+    case "serve":
       break;
     case "tools": {
       if (rest[0] === "add") {
@@ -184,6 +219,24 @@ async function main() {
       () => ({ root, session: newSession(provider), provider, mode, tools, allowed: new Set() }),
       (m) => console.log(`${c.dim(new Date().toISOString().slice(11, 19))} ${m}`),
     );
+  }
+
+  if (cmd === "serve") {
+    const provider = needProvider(config, values);
+    const tools = serveTools(await loadTools(console.error, config, VERSION));
+    console.log(c.dim(`folder ${root} · ${provider.name}/${provider.model} · mode ${mode} · ${tools.length} tools`));
+    if (mode !== "ask") console.log(c.yellow("  briefs come from outside clients: run serve in a folder made for this work"));
+    const log = (m: string) => console.log(`${c.dim(new Date().toISOString().slice(11, 19))} ${m}`);
+    return serve(await nexusFor(VERSION), async (service, job) => {
+      const state: AgentState = { root, session: newSession(provider), provider, mode, tools, allowed: new Set(), noMemory: true };
+      state.session.title = `nexus job #${job.id}`;
+      try {
+        await runTurn(state, jobPrompt(service, job), printIO(state));
+      } finally {
+        await saveSession(sessionOf(state));
+      }
+      return state.session.messages.findLast((m) => m.role === "assistant" && m.content)?.content ?? "";
+    }, log);
   }
 
   let session: Session | undefined;

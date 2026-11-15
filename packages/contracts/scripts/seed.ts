@@ -74,12 +74,139 @@ async function main() {
   }));
   writeFileSync(file, JSON.stringify(deployment, null, 2) + "\n");
 
+  await seedNexus(deployment, sha256);
+  writeFileSync(file, JSON.stringify(deployment, null, 2) + "\n");
+
   const rpc = (network.config as { url: string }).url;
   const installer = readFileSync(`${cliDir}/install.sh`, "utf8")
     .replace("__REGISTRY__", contracts.KinetraReleaseRegistry.proxy)
     .replace("__RPC__", rpc)
     .replace("__SITE__", SITE);
   writeFileSync(`${webDir}/install.sh`, installer);
+}
+
+/**
+ * Gives Nexus its first agent: the KINETRA identity, its agent wallet and three services. A smoke-test job then runs
+ * the whole escrow cycle on the live contracts (hire from the wallet, deliver, check the delivery, accept). The
+ * services pause afterwards until a `kinetra serve` worker is running for them.
+ */
+async function seedNexus(deployment: any, sha256: (d: string | Buffer) => string) {
+  const { contracts } = deployment;
+  if (!contracts.KinetraServiceMarket) return;
+  const [me] = await ethers.getSigners();
+  const agents = await ethers.getContractAt("KinetraAgentRegistry", contracts.KinetraAgentRegistry.proxy);
+  const market = await ethers.getContractAt("KinetraServiceMarket", contracts.KinetraServiceMarket.proxy);
+  const factory = await ethers.getContractAt("KinetraWalletFactory", contracts.KinetraWalletFactory.proxy);
+  const kntr: string | null = deployment.kntr ?? null;
+
+  const profile = {
+    name: "kinetra",
+    description: "The official KINETRA agent. Code review, unit tests and release attestations, delivered by kinetra serve.",
+    site: SITE,
+  };
+  mkdirSync(`${webDir}/agents`, { recursive: true });
+  writeFileSync(`${webDir}/agents/kinetra.json`, JSON.stringify(profile, null, 2) + "\n");
+  if (!(await agents.isRegistered(me.address))) {
+    await (await agents.register("kinetra", `${SITE}/agents/kinetra.json`, ethers.ZeroAddress)).wait();
+    console.log("agent kinetra registered");
+  }
+
+  let [wallet] = await factory.walletsOf(me.address);
+  if (!wallet) {
+    const expires = Math.floor(Date.now() / 1000) + 365 * 86_400;
+    const args = [me.address, me.address, expires, ethers.parseEther("0.001"), ethers.parseEther("0.005"), ethers.id("kinetra")] as const;
+    wallet = await factory.predictWallet(...args);
+    await (await factory.createWallet(...args)).wait();
+    console.log("agent wallet created");
+  }
+  if ((await ethers.provider.getBalance(wallet)) < ethers.parseEther("0.00002")) {
+    await (await me.sendTransaction({ to: wallet, value: ethers.parseEther("0.00005") })).wait();
+  }
+
+  const SERVICES = [
+    { title: "Release attestation", details: "Checks a KINETRA release: the sha256 notarized in KinetraReleaseRegistry against the package GitHub serves.", asset: ethers.ZeroAddress, price: ethers.parseEther("0.00001") },
+    { title: "Code review", details: "Reviews a diff or a public repo for bugs, security holes and missing tests. Send the diff or the URL in the brief.", asset: ethers.ZeroAddress, price: ethers.parseEther("0.002") },
+    kntr
+      ? { title: "Unit tests", details: "Writes unit tests for the code in the brief, in its own test framework. Paid in $KNTR.", asset: kntr, price: ethers.parseEther("1000") }
+      : { title: "Unit tests", details: "Writes unit tests for the code in the brief, in its own test framework.", asset: ethers.ZeroAddress, price: ethers.parseEther("0.003") },
+  ];
+  const listed = (await market.services(0, 100)).map((s: any, id: number) => ({ id, ...s.toObject() }));
+  for (const svc of SERVICES) {
+    if (listed.some((l: any) => l.provider === me.address && l.title === svc.title)) continue;
+    await (await market.listService(svc.title, svc.details, svc.asset, svc.price)).wait();
+    console.log(`service "${svc.title}" listed`);
+  }
+  const mine = (await market.services(0, 100)).map((s: any, id: number) => ({ id, ...s.toObject() })).filter((s: any) => s.provider === me.address);
+  const attest = mine.find((s: any) => s.title === "Release attestation")!;
+
+  const walletC = await ethers.getContractAt("KinetraAgentWallet", wallet);
+  const jobs = Number(await market.jobCount());
+  let done = false;
+  for (let id = 0; id < jobs && !done; id++) done = (await market.job(id)).client === wallet && (await market.job(id)).status === 3n;
+  if (!done) {
+    if (!attest.active) await (await market.updateService(attest.id, attest.price, true)).wait();
+    const hire = market.interface.encodeFunctionData("hire", [attest.id, "Smoke test after deployment: attest the latest KINETRA release."]);
+    await (await walletC.spend(ethers.ZeroAddress, await market.getAddress(), attest.price, hire)).wait();
+    const id = Number(await market.jobCount()) - 1;
+    const releases = await ethers.getContractAt("KinetraReleaseRegistry", contracts.KinetraReleaseRegistry.proxy);
+    const [version, checksum, uri] = await releases.latest();
+    const res = await fetch(uri);
+    const served = sha256(Buffer.from(await res.arrayBuffer()));
+    const result = JSON.stringify({ version, notarized: checksum, served, match: served === checksum, registry: contracts.KinetraReleaseRegistry.proxy });
+    await (await market.deliver(id, result)).wait();
+    if (JSON.parse((await market.job(id)).result).match !== true) throw new Error(`smoke test job #${id}: release ${version} does not match its notarized checksum`);
+    const accept = market.interface.encodeFunctionData("accept", [id, 5]);
+    await (await walletC.spend(ethers.ZeroAddress, await market.getAddress(), 0, accept)).wait();
+    console.log(`smoke test job #${id} settled through the agent wallet`);
+  }
+  for (const s of (await market.services(0, 100)).map((s: any, id: number) => ({ id, ...s.toObject() })).filter((s: any) => s.provider === me.address && s.active)) {
+    await (await market.updateService(s.id, s.price, false)).wait();
+  }
+
+  // snapshot for the site, in the shape apps/web/src/lib/chain.ts reads live
+  const agentList = await agents.agents(0, 100);
+  const byAccount = new Map(agentList.map((a: any) => [a.account, a]));
+  const services = (await market.services(0, 100)).map((s: any, id: number) => {
+    const a: any = byAccount.get(s.provider);
+    return {
+      id,
+      title: s.title,
+      details: s.details,
+      provider: a?.name ?? "agent",
+      rating: a && a.ratingCount ? Math.round((Number(a.ratingSum) / Number(a.ratingCount)) * 10) / 10 : null,
+      price: ethers.formatEther(s.price),
+      asset: s.asset === ethers.ZeroAddress ? "ETH" : s.asset.toLowerCase() === kntr?.toLowerCase() ? "KNTR" : "token",
+      active: s.active,
+      jobs: Number(s.jobs),
+    };
+  });
+  let lastJob = null;
+  for (let id = Number(await market.jobCount()) - 1; id >= 0 && !lastJob; id--) {
+    const j = await market.job(id);
+    if (j.status !== 3n) continue;
+    lastJob = {
+      id,
+      serviceId: Number(j.serviceId),
+      amount: ethers.formatEther(j.amount),
+      asset: j.asset === ethers.ZeroAddress ? "ETH" : "KNTR",
+      rating: Number(j.rating),
+      createdAt: Number(j.createdAt),
+      deliveredAt: Number(j.deliveredAt),
+      status: "completed",
+    };
+  }
+  deployment.nexus = {
+    stats: {
+      agents: Number(await agents.agentCount()),
+      services: services.length,
+      jobs: Number(await market.jobCount()),
+      completed: Number(await market.completedJobs()),
+      wallets: Number(await factory.walletCount()),
+      volumeEth: ethers.formatEther(await market.volume(ethers.ZeroAddress)),
+    },
+    services,
+    lastJob,
+  };
 }
 
 main().catch((e) => {
