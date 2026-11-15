@@ -1,6 +1,6 @@
 {
   "name": "@kinetra/cli",
-  "version": "2.0.0",
+  "version": "3.0.0-testnet.1",
   "description": "KINETRA: the terminal agent that turns intent into execution, and the SDK for KINETRA Nexus.",
   "license": "MIT",
   "type": "module",
