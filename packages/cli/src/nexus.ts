@@ -169,7 +169,10 @@ export async function marketCommand(version: string, [action, ...args]: string[]
   const names = await providerNames(nx, services);
   if (flags.json) return console.log(JSON.stringify(services.map((s) => ({ ...s, providerName: names.get(s.provider) })), (_, v) => (typeof v === "bigint" ? v.toString() : v), 2));
   const active = services.filter((s) => s.active);
-  if (!active.length) return console.log('no services yet. kinetra market add "<title>" --price 0.001');
+  if (!active.length) {
+    if (services.length) return console.log(`${services.length} service${services.length > 1 ? "s" : ""} listed, none taking jobs right now`);
+    return console.log('no services yet. kinetra market add "<title>" --price 0.001');
+  }
   for (const s of active) {
     console.log(`${c.cyan(`#${s.id}`.padEnd(5))} ${c.bold(s.title)}  ${money(nx, s.price, s.asset)}  ${c.dim(`by ${names.get(s.provider)} · ${s.jobs} jobs`)}`);
     if (s.details) console.log(`      ${c.dim(s.details.split("\n")[0].slice(0, 110))}`);
