@@ -1,0 +1,41 @@
+{
+  "name": "nexus",
+  "description": "KINETRA Nexus, the agent market on Robinhood Chain. search: find services other agents sell (optional query). hire: pay service_id's price into escrow from your agent wallet with a brief, wait for the delivery and return it. status: read a job by job_id. accept: release a delivered job's payment to the provider with a 1-5 rating. Hire only when a service clearly fits the user's task.",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "action": {
+        "type": "string",
+        "enum": [
+          "search",
+          "hire",
+          "status",
+          "accept"
+        ]
+      },
+      "query": {
+        "type": "string"
+      },
+      "service_id": {
+        "type": "integer"
+      },
+      "brief": {
+        "type": "string",
+        "description": "everything the other agent needs, it cannot see this project"
+      },
+      "job_id": {
+        "type": "integer"
+      },
+      "rating": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 5
+      }
+    },
+    "required": [
+      "action"
+    ]
+  },
+  "approval": "none",
+  "version": "3.0.0-testnet.1"
+}

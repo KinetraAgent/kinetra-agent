@@ -10,6 +10,21 @@
       "address": "0xAFc36c0CFb84404CC50e07425B66c9C2b16bDCB7",
       "txHash": "0xc75655fe367cf8df106f87732c081f484f4c7eeaaba595611abc24bd6f1ef02e",
       "kind": "uups"
+    },
+    {
+      "address": "0xeBC0210814aa12F500adfd478DD33eA32bCe6fc7",
+      "txHash": "0x03401691df6204205d28482737dc02a020e89b30e0c43e75d5e664996acc57f8",
+      "kind": "uups"
+    },
+    {
+      "address": "0xd3b04846b585675c6290e78Ddf95EDfa4e54B06c",
+      "txHash": "0x1fb5a4e9697dacb55fbfe7c17eb8a72244b14b35d91dfcc267dfa67d42d6fe37",
+      "kind": "uups"
+    },
+    {
+      "address": "0xf7F7300f34A6007e267887F960f3A577A0Fb8AEf",
+      "txHash": "0x3a8ea638ed2d47ff0108fb67a413d9add024f22d884056f2910875b677b7341d",
+      "kind": "uups"
     }
   ],
   "impls": {
@@ -285,6 +300,825 @@
               }
             ],
             "numberOfBytes": "160"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          }
+        },
+        "namespaces": {
+          "erc7201:openzeppelin.storage.Ownable": [
+            {
+              "contract": "OwnableUpgradeable",
+              "label": "_owner",
+              "type": "t_address",
+              "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:24",
+              "offset": 0,
+              "slot": "0"
+            }
+          ],
+          "erc7201:openzeppelin.storage.Initializable": [
+            {
+              "contract": "Initializable",
+              "label": "_initialized",
+              "type": "t_uint64",
+              "src": "@openzeppelin/contracts/proxy/utils/Initializable.sol:69",
+              "offset": 0,
+              "slot": "0"
+            },
+            {
+              "contract": "Initializable",
+              "label": "_initializing",
+              "type": "t_bool",
+              "src": "@openzeppelin/contracts/proxy/utils/Initializable.sol:73",
+              "offset": 8,
+              "slot": "0"
+            }
+          ]
+        }
+      }
+    },
+    "3bdcaca2b436985a812e77353272815bec548cbdcebdcad7d3afd4d3b5a027d8": {
+      "address": "0x768acaE106de2e801496DB662Ea6c3e3a411106A",
+      "txHash": "0x62f26a85ad3d3150610f154ffbd8b2f2bf8a7789d867d214dc6f04f1573a956e",
+      "layout": {
+        "solcVersion": "0.8.28",
+        "storage": [
+          {
+            "label": "_agents",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_array(t_struct(Agent)3408_storage)dyn_storage",
+            "contract": "KinetraAgentRegistry",
+            "src": "contracts/KinetraAgentRegistry.sol:26"
+          },
+          {
+            "label": "_ids",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_mapping(t_address,t_uint256)",
+            "contract": "KinetraAgentRegistry",
+            "src": "contracts/KinetraAgentRegistry.sol:27"
+          },
+          {
+            "label": "_names",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_mapping(t_bytes32,t_uint256)",
+            "contract": "KinetraAgentRegistry",
+            "src": "contracts/KinetraAgentRegistry.sol:28"
+          },
+          {
+            "label": "market",
+            "offset": 0,
+            "slot": "3",
+            "type": "t_address",
+            "contract": "KinetraAgentRegistry",
+            "src": "contracts/KinetraAgentRegistry.sol:29"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_struct(InitializableStorage)398_storage": {
+            "label": "struct Initializable.InitializableStorage",
+            "members": [
+              {
+                "label": "_initialized",
+                "type": "t_uint64",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "_initializing",
+                "type": "t_bool",
+                "offset": 8,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(OwnableStorage)13_storage": {
+            "label": "struct OwnableUpgradeable.OwnableStorage",
+            "members": [
+              {
+                "label": "_owner",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_uint64": {
+            "label": "uint64",
+            "numberOfBytes": "8"
+          },
+          "t_array(t_struct(Agent)3408_storage)dyn_storage": {
+            "label": "struct KinetraAgentRegistry.Agent[]",
+            "numberOfBytes": "32"
+          },
+          "t_bytes32": {
+            "label": "bytes32",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_uint256)": {
+            "label": "mapping(address => uint256)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_uint256)": {
+            "label": "mapping(bytes32 => uint256)",
+            "numberOfBytes": "32"
+          },
+          "t_string_storage": {
+            "label": "string",
+            "numberOfBytes": "32"
+          },
+          "t_struct(Agent)3408_storage": {
+            "label": "struct KinetraAgentRegistry.Agent",
+            "members": [
+              {
+                "label": "account",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "name",
+                "type": "t_string_storage",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "metadataURI",
+                "type": "t_string_storage",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "payout",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "3"
+              },
+              {
+                "label": "registeredAt",
+                "type": "t_uint64",
+                "offset": 20,
+                "slot": "3"
+              },
+              {
+                "label": "jobsCompleted",
+                "type": "t_uint32",
+                "offset": 28,
+                "slot": "3"
+              },
+              {
+                "label": "ratingCount",
+                "type": "t_uint32",
+                "offset": 0,
+                "slot": "4"
+              },
+              {
+                "label": "ratingSum",
+                "type": "t_uint64",
+                "offset": 4,
+                "slot": "4"
+              }
+            ],
+            "numberOfBytes": "160"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint32": {
+            "label": "uint32",
+            "numberOfBytes": "4"
+          }
+        },
+        "namespaces": {
+          "erc7201:openzeppelin.storage.Ownable": [
+            {
+              "contract": "OwnableUpgradeable",
+              "label": "_owner",
+              "type": "t_address",
+              "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:24",
+              "offset": 0,
+              "slot": "0"
+            }
+          ],
+          "erc7201:openzeppelin.storage.Initializable": [
+            {
+              "contract": "Initializable",
+              "label": "_initialized",
+              "type": "t_uint64",
+              "src": "@openzeppelin/contracts/proxy/utils/Initializable.sol:69",
+              "offset": 0,
+              "slot": "0"
+            },
+            {
+              "contract": "Initializable",
+              "label": "_initializing",
+              "type": "t_bool",
+              "src": "@openzeppelin/contracts/proxy/utils/Initializable.sol:73",
+              "offset": 8,
+              "slot": "0"
+            }
+          ]
+        }
+      }
+    },
+    "ab507eae72a9700ab9addd403a037c7aae486afc5d9b707740ac021531bf9e9c": {
+      "address": "0xe67D6De6FB61468616D19B04EF6dfc7d2e0D8F78",
+      "txHash": "0x0713b6f7067efda34b26cae7ff6c870b598dcac903763206c7fcd52c1d656611",
+      "layout": {
+        "solcVersion": "0.8.28",
+        "storage": [
+          {
+            "label": "registry",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_contract(IKinetraAgentRegistry)3351",
+            "contract": "KinetraServiceMarket",
+            "src": "contracts/KinetraServiceMarket.sol:64"
+          },
+          {
+            "label": "treasury",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_address",
+            "contract": "KinetraServiceMarket",
+            "src": "contracts/KinetraServiceMarket.sol:65"
+          },
+          {
+            "label": "feeBps",
+            "offset": 20,
+            "slot": "1",
+            "type": "t_uint16",
+            "contract": "KinetraServiceMarket",
+            "src": "contracts/KinetraServiceMarket.sol:66"
+          },
+          {
+            "label": "deliveryWindow",
+            "offset": 22,
+            "slot": "1",
+            "type": "t_uint64",
+            "contract": "KinetraServiceMarket",
+            "src": "contracts/KinetraServiceMarket.sol:67"
+          },
+          {
+            "label": "reviewWindow",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_uint64",
+            "contract": "KinetraServiceMarket",
+            "src": "contracts/KinetraServiceMarket.sol:68"
+          },
+          {
+            "label": "supportedAsset",
+            "offset": 0,
+            "slot": "3",
+            "type": "t_mapping(t_address,t_bool)",
+            "contract": "KinetraServiceMarket",
+            "src": "contracts/KinetraServiceMarket.sol:69"
+          },
+          {
+            "label": "volume",
+            "offset": 0,
+            "slot": "4",
+            "type": "t_mapping(t_address,t_uint256)",
+            "contract": "KinetraServiceMarket",
+            "src": "contracts/KinetraServiceMarket.sol:71"
+          },
+          {
+            "label": "completedJobs",
+            "offset": 0,
+            "slot": "5",
+            "type": "t_uint256",
+            "contract": "KinetraServiceMarket",
+            "src": "contracts/KinetraServiceMarket.sol:72"
+          },
+          {
+            "label": "_services",
+            "offset": 0,
+            "slot": "6",
+            "type": "t_array(t_struct(Service)3387_storage)dyn_storage",
+            "contract": "KinetraServiceMarket",
+            "src": "contracts/KinetraServiceMarket.sol:74"
+          },
+          {
+            "label": "_jobs",
+            "offset": 0,
+            "slot": "7",
+            "type": "t_array(t_struct(Job)3411_storage)dyn_storage",
+            "contract": "KinetraServiceMarket",
+            "src": "contracts/KinetraServiceMarket.sol:75"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_struct(InitializableStorage)307_storage": {
+            "label": "struct Initializable.InitializableStorage",
+            "members": [
+              {
+                "label": "_initialized",
+                "type": "t_uint64",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "_initializing",
+                "type": "t_bool",
+                "offset": 8,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(OwnableStorage)13_storage": {
+            "label": "struct OwnableUpgradeable.OwnableStorage",
+            "members": [
+              {
+                "label": "_owner",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_uint64": {
+            "label": "uint64",
+            "numberOfBytes": "8"
+          },
+          "t_array(t_struct(Job)3411_storage)dyn_storage": {
+            "label": "struct KinetraServiceMarket.Job[]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_struct(Service)3387_storage)dyn_storage": {
+            "label": "struct KinetraServiceMarket.Service[]",
+            "numberOfBytes": "32"
+          },
+          "t_contract(IKinetraAgentRegistry)3351": {
+            "label": "contract IKinetraAgentRegistry",
+            "numberOfBytes": "20"
+          },
+          "t_enum(Status)3370": {
+            "label": "enum KinetraServiceMarket.Status",
+            "members": [
+              "None",
+              "Open",
+              "Delivered",
+              "Completed",
+              "Refunded"
+            ],
+            "numberOfBytes": "1"
+          },
+          "t_mapping(t_address,t_bool)": {
+            "label": "mapping(address => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_uint256)": {
+            "label": "mapping(address => uint256)",
+            "numberOfBytes": "32"
+          },
+          "t_string_storage": {
+            "label": "string",
+            "numberOfBytes": "32"
+          },
+          "t_struct(Job)3411_storage": {
+            "label": "struct KinetraServiceMarket.Job",
+            "members": [
+              {
+                "label": "serviceId",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "client",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "provider",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "asset",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "3"
+              },
+              {
+                "label": "amount",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "4"
+              },
+              {
+                "label": "status",
+                "type": "t_enum(Status)3370",
+                "offset": 0,
+                "slot": "5"
+              },
+              {
+                "label": "rating",
+                "type": "t_uint8",
+                "offset": 1,
+                "slot": "5"
+              },
+              {
+                "label": "createdAt",
+                "type": "t_uint64",
+                "offset": 2,
+                "slot": "5"
+              },
+              {
+                "label": "deliveredAt",
+                "type": "t_uint64",
+                "offset": 10,
+                "slot": "5"
+              },
+              {
+                "label": "brief",
+                "type": "t_string_storage",
+                "offset": 0,
+                "slot": "6"
+              },
+              {
+                "label": "result",
+                "type": "t_string_storage",
+                "offset": 0,
+                "slot": "7"
+              }
+            ],
+            "numberOfBytes": "256"
+          },
+          "t_struct(Service)3387_storage": {
+            "label": "struct KinetraServiceMarket.Service",
+            "members": [
+              {
+                "label": "provider",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "title",
+                "type": "t_string_storage",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "details",
+                "type": "t_string_storage",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "asset",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "3"
+              },
+              {
+                "label": "price",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "4"
+              },
+              {
+                "label": "active",
+                "type": "t_bool",
+                "offset": 0,
+                "slot": "5"
+              },
+              {
+                "label": "listedAt",
+                "type": "t_uint64",
+                "offset": 1,
+                "slot": "5"
+              },
+              {
+                "label": "jobs",
+                "type": "t_uint32",
+                "offset": 9,
+                "slot": "5"
+              }
+            ],
+            "numberOfBytes": "192"
+          },
+          "t_uint16": {
+            "label": "uint16",
+            "numberOfBytes": "2"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint32": {
+            "label": "uint32",
+            "numberOfBytes": "4"
+          },
+          "t_uint8": {
+            "label": "uint8",
+            "numberOfBytes": "1"
+          }
+        },
+        "namespaces": {
+          "erc7201:openzeppelin.storage.Ownable": [
+            {
+              "contract": "OwnableUpgradeable",
+              "label": "_owner",
+              "type": "t_address",
+              "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:24",
+              "offset": 0,
+              "slot": "0"
+            }
+          ],
+          "erc7201:openzeppelin.storage.Initializable": [
+            {
+              "contract": "Initializable",
+              "label": "_initialized",
+              "type": "t_uint64",
+              "src": "@openzeppelin/contracts/proxy/utils/Initializable.sol:69",
+              "offset": 0,
+              "slot": "0"
+            },
+            {
+              "contract": "Initializable",
+              "label": "_initializing",
+              "type": "t_bool",
+              "src": "@openzeppelin/contracts/proxy/utils/Initializable.sol:73",
+              "offset": 8,
+              "slot": "0"
+            }
+          ]
+        }
+      }
+    },
+    "7d87e2c6d46e4455887587e4bb19ecfae7c0d97704df21a9e7dcc2b6d9723ef2": {
+      "address": "0xD010947Ac1f5D1DEDd6D7A0a071bEbAd7Ab26264",
+      "txHash": "0xe4088da6619a681f27ea6c811562d2c2f2b6d8c57cefc08a4ad9d0eaf45e9d94",
+      "layout": {
+        "solcVersion": "0.8.28",
+        "storage": [
+          {
+            "label": "owner",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_address",
+            "contract": "KinetraAgentWallet",
+            "src": "contracts/KinetraAgentWallet.sol:23"
+          },
+          {
+            "label": "agentExpiry",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_mapping(t_address,t_uint64)",
+            "contract": "KinetraAgentWallet",
+            "src": "contracts/KinetraAgentWallet.sol:24"
+          },
+          {
+            "label": "_limits",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_mapping(t_address,t_mapping(t_address,t_struct(Limit)2665_storage))",
+            "contract": "KinetraAgentWallet",
+            "src": "contracts/KinetraAgentWallet.sol:25"
+          },
+          {
+            "label": "_spent",
+            "offset": 0,
+            "slot": "3",
+            "type": "t_mapping(t_address,t_mapping(t_address,t_mapping(t_uint256,t_uint256)))",
+            "contract": "KinetraAgentWallet",
+            "src": "contracts/KinetraAgentWallet.sol:26"
+          },
+          {
+            "label": "allowedTarget",
+            "offset": 0,
+            "slot": "4",
+            "type": "t_mapping(t_address,t_bool)",
+            "contract": "KinetraAgentWallet",
+            "src": "contracts/KinetraAgentWallet.sol:27"
+          }
+        ],
+        "types": {
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_struct(InitializableStorage)307_storage": {
+            "label": "struct Initializable.InitializableStorage",
+            "members": [
+              {
+                "label": "_initialized",
+                "type": "t_uint64",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "_initializing",
+                "type": "t_bool",
+                "offset": 8,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_uint64": {
+            "label": "uint64",
+            "numberOfBytes": "8"
+          },
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_mapping(t_address,t_bool)": {
+            "label": "mapping(address => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_mapping(t_address,t_mapping(t_uint256,t_uint256)))": {
+            "label": "mapping(address => mapping(address => mapping(uint256 => uint256)))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_mapping(t_address,t_struct(Limit)2665_storage))": {
+            "label": "mapping(address => mapping(address => struct KinetraAgentWallet.Limit))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_mapping(t_uint256,t_uint256))": {
+            "label": "mapping(address => mapping(uint256 => uint256))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_struct(Limit)2665_storage)": {
+            "label": "mapping(address => struct KinetraAgentWallet.Limit)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_uint64)": {
+            "label": "mapping(address => uint64)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_uint256)": {
+            "label": "mapping(uint256 => uint256)",
+            "numberOfBytes": "32"
+          },
+          "t_struct(Limit)2665_storage": {
+            "label": "struct KinetraAgentWallet.Limit",
+            "members": [
+              {
+                "label": "perTx",
+                "type": "t_uint128",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "perDay",
+                "type": "t_uint128",
+                "offset": 16,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_uint128": {
+            "label": "uint128",
+            "numberOfBytes": "16"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          }
+        },
+        "namespaces": {
+          "erc7201:openzeppelin.storage.Initializable": [
+            {
+              "contract": "Initializable",
+              "label": "_initialized",
+              "type": "t_uint64",
+              "src": "@openzeppelin/contracts/proxy/utils/Initializable.sol:69",
+              "offset": 0,
+              "slot": "0"
+            },
+            {
+              "contract": "Initializable",
+              "label": "_initializing",
+              "type": "t_bool",
+              "src": "@openzeppelin/contracts/proxy/utils/Initializable.sol:73",
+              "offset": 8,
+              "slot": "0"
+            }
+          ]
+        }
+      }
+    },
+    "2527f4607f7e46398a76ba19ca00afc633453407a2f76cbb5f39838accdea96d": {
+      "address": "0x4276c97bAcB36364B5664fa6d4Ed08C8C8C1Dc08",
+      "txHash": "0xa836c0bfe8e8a8923e151c357b47efd20a2c23427a54d01b87de30c09123ddca",
+      "layout": {
+        "solcVersion": "0.8.28",
+        "storage": [
+          {
+            "label": "beacon",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_address",
+            "contract": "KinetraWalletFactory",
+            "src": "contracts/KinetraWalletFactory.sol:18"
+          },
+          {
+            "label": "defaultTarget",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_address",
+            "contract": "KinetraWalletFactory",
+            "src": "contracts/KinetraWalletFactory.sol:20"
+          },
+          {
+            "label": "walletCount",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_uint256",
+            "contract": "KinetraWalletFactory",
+            "src": "contracts/KinetraWalletFactory.sol:21"
+          },
+          {
+            "label": "_walletsOf",
+            "offset": 0,
+            "slot": "3",
+            "type": "t_mapping(t_address,t_array(t_address)dyn_storage)",
+            "contract": "KinetraWalletFactory",
+            "src": "contracts/KinetraWalletFactory.sol:22"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_struct(InitializableStorage)398_storage": {
+            "label": "struct Initializable.InitializableStorage",
+            "members": [
+              {
+                "label": "_initialized",
+                "type": "t_uint64",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "_initializing",
+                "type": "t_bool",
+                "offset": 8,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(OwnableStorage)13_storage": {
+            "label": "struct OwnableUpgradeable.OwnableStorage",
+            "members": [
+              {
+                "label": "_owner",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_uint64": {
+            "label": "uint64",
+            "numberOfBytes": "8"
+          },
+          "t_array(t_address)dyn_storage": {
+            "label": "address[]",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_array(t_address)dyn_storage)": {
+            "label": "mapping(address => address[])",
+            "numberOfBytes": "32"
           },
           "t_uint256": {
             "label": "uint256",

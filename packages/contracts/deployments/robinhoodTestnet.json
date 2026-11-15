@@ -13,86 +13,172 @@
       "implementation": "0xF516044237Ce7486c17A228688d5A5A069a0a795",
       "block": 152903164,
       "verified": true
+    },
+    "KinetraAgentRegistry": {
+      "proxy": "0xeBC0210814aa12F500adfd478DD33eA32bCe6fc7",
+      "implementation": "0x768acaE106de2e801496DB662Ea6c3e3a411106A",
+      "block": 153402568,
+      "verified": true
+    },
+    "KinetraServiceMarket": {
+      "proxy": "0xd3b04846b585675c6290e78Ddf95EDfa4e54B06c",
+      "implementation": "0xe67D6De6FB61468616D19B04EF6dfc7d2e0D8F78",
+      "block": 153402611,
+      "verified": true
+    },
+    "KinetraAgentWallet": {
+      "beacon": "0x73C24F41131b3cEB5661652e4595190050742Bfa",
+      "implementation": "0xD010947Ac1f5D1DEDd6D7A0a071bEbAd7Ab26264",
+      "block": 153402663,
+      "verified": true
+    },
+    "KinetraWalletFactory": {
+      "proxy": "0xf7F7300f34A6007e267887F960f3A577A0Fb8AEf",
+      "implementation": "0x4276c97bAcB36364B5664fa6d4Ed08C8C8C1Dc08",
+      "block": 153402691,
+      "verified": true
     }
   },
   "release": {
-    "version": "2.0.0-testnet.1",
-    "checksum": "0xb6984ed74af7394f67b070700187aa3d181f7e2f0a8e36b80623eb63e5564ce2",
-    "uri": "https://github.com/KinetraAgent/kinetra-agent/releases/download/v2.0.0-testnet.1/kinetra-cli-2.0.0-testnet.1.tgz",
-    "publishedAt": 1794688759
+    "version": "3.0.0-testnet.1",
+    "checksum": "0x05d241ee65bd6e567adef788f68b79e8575732c87f9301b0ff50c535f9b232b4",
+    "uri": "https://github.com/KinetraAgent/kinetra-agent/releases/download/v3.0.0-testnet.1/kinetra-cli-3.0.0-testnet.1.tgz",
+    "publishedAt": 1794701884
   },
   "tools": [
     {
       "name": "read_file",
       "manifestURI": "https://testnet.kinetraagent.tech/tools/read_file.json",
-      "manifestHash": "0x854d534273320eeca9e47385e8b4649526ac42759d14ec95001d44e310cc28a1",
+      "manifestHash": "0xc8b52a431d9aff08807129ef71d35340e60b8671864522c328f862c555cedb2d",
       "verified": true
     },
     {
       "name": "write_file",
       "manifestURI": "https://testnet.kinetraagent.tech/tools/write_file.json",
-      "manifestHash": "0x714548148aa0fe5ba3a9a401f31ded085a82627e2d4dd8911162925b3d4f9943",
+      "manifestHash": "0xf543b117ca5ef08908d8734af765b858e1effc3480dbf92896df5fc0441c93d6",
       "verified": true
     },
     {
       "name": "edit_file",
       "manifestURI": "https://testnet.kinetraagent.tech/tools/edit_file.json",
-      "manifestHash": "0x8fd36730578938e0984a26e273001b3c631d3855b862d5e0bf45c87e44b69b76",
+      "manifestHash": "0x0c695f453064e76d83ee5df9710296bf28a970312c1ea55ed03f88665113b5d1",
       "verified": true
     },
     {
       "name": "list_dir",
       "manifestURI": "https://testnet.kinetraagent.tech/tools/list_dir.json",
-      "manifestHash": "0x79b5552edd6da551fb66a62f033b33803078f39b0575a568b893879f18fcad94",
+      "manifestHash": "0x212594bfe678537963ed8330e6791f6661c7cd08b65a6898892364855fbf5162",
       "verified": true
     },
     {
       "name": "search_files",
       "manifestURI": "https://testnet.kinetraagent.tech/tools/search_files.json",
-      "manifestHash": "0x54b3c420129138b84c24c8efd393d6ceae285ff3624958084c38b202d07eb60b",
+      "manifestHash": "0x5e3d59a3eafafdbaa8b53432f21fd69e08242b2e7e8c1c6152db84059664d2b8",
       "verified": true
     },
     {
       "name": "run_command",
       "manifestURI": "https://testnet.kinetraagent.tech/tools/run_command.json",
-      "manifestHash": "0xeec445710d5c5ea9263ab4605cf02cc27df38ba279d1590ef4448cfdd85ea100",
+      "manifestHash": "0xaf743a32a577bd51650506f8e44f4825f6afd9ec376008d6810fd75a09a8696e",
       "verified": true
     },
     {
       "name": "git_diff",
       "manifestURI": "https://testnet.kinetraagent.tech/tools/git_diff.json",
-      "manifestHash": "0x369ae8f0ae8b0932b483a98a4803f75e03bb44fa53bbba6cd5fe5aafee65bdd6",
+      "manifestHash": "0x67612190e515bedc869941eb1a159f565148154c5edee841c346c6f1a22e0f05",
       "verified": true
     },
     {
       "name": "remember",
       "manifestURI": "https://testnet.kinetraagent.tech/tools/remember.json",
-      "manifestHash": "0x4ca3a1a6e8f6493f0ec08230019404c2d5be6fc4b47dd31f2a225c52d9b3dd5e",
+      "manifestHash": "0x8507a1e7f46342095532794993d051dbae849628be52419275e2e4e1d7139acc",
       "verified": true
     },
     {
       "name": "recall",
       "manifestURI": "https://testnet.kinetraagent.tech/tools/recall.json",
-      "manifestHash": "0xc2e61e592c563a3de17747bd0a62358542533dc068eb9bd0b4cf26f27aef716d",
+      "manifestHash": "0xac761a0f9ea94bb11119d53e5f14d4603d909f331e8a51df7a405cbd7299b5d3",
       "verified": true
     },
     {
       "name": "fetch_url",
       "manifestURI": "https://testnet.kinetraagent.tech/tools/fetch_url.json",
-      "manifestHash": "0x2d20d2aeb26110bbae06402891c329c18e61483dbadfe958024fa451aedf0c5d",
+      "manifestHash": "0x6a7394955f6d88e23cb8f21ad7b6ad421666fb55799ad80fca1f7f4ce0930ca9",
       "verified": true
     },
     {
       "name": "github",
       "manifestURI": "https://testnet.kinetraagent.tech/tools/github.json",
-      "manifestHash": "0x1c90204865992cfceb3c4f772d76529bad52f12958e6e7e377fca72a7dc8018b",
+      "manifestHash": "0x163bddfc7388fd8879733f6c2da5fb11ce5f3786efa448fa926cad68589157c8",
       "verified": true
     },
     {
       "name": "delegate",
       "manifestURI": "https://testnet.kinetraagent.tech/tools/delegate.json",
-      "manifestHash": "0xc1fe49ff85407d7de17b50107f3bd7bacc1ddf1d73f9a47f68996d7a1442cc48",
+      "manifestHash": "0x77dba97b3b0b31593821c7b0457441cc631ab563503641c8e5472cc4c14dfab3",
+      "verified": true
+    },
+    {
+      "name": "nexus",
+      "manifestURI": "https://testnet.kinetraagent.tech/tools/nexus.json",
+      "manifestHash": "0x6bd00c75146fe442abeacca99f5cca310d953c368f0e98f3a480848098609707",
       "verified": true
     }
-  ]
+  ],
+  "kntr": null,
+  "nexus": {
+    "stats": {
+      "agents": 1,
+      "services": 3,
+      "jobs": 1,
+      "completed": 1,
+      "wallets": 1,
+      "volumeEth": "0.00001"
+    },
+    "services": [
+      {
+        "id": 0,
+        "title": "Release attestation",
+        "details": "Checks a KINETRA release: the sha256 notarized in KinetraReleaseRegistry against the package GitHub serves.",
+        "provider": "kinetra",
+        "rating": 5,
+        "price": "0.00001",
+        "asset": "ETH",
+        "active": false,
+        "jobs": 1
+      },
+      {
+        "id": 1,
+        "title": "Code review",
+        "details": "Reviews a diff or a public repo for bugs, security holes and missing tests. Send the diff or the URL in the brief.",
+        "provider": "kinetra",
+        "rating": 5,
+        "price": "0.002",
+        "asset": "ETH",
+        "active": false,
+        "jobs": 0
+      },
+      {
+        "id": 2,
+        "title": "Unit tests",
+        "details": "Writes unit tests for the code in the brief, in its own test framework.",
+        "provider": "kinetra",
+        "rating": 5,
+        "price": "0.003",
+        "asset": "ETH",
+        "active": false,
+        "jobs": 0
+      }
+    ],
+    "lastJob": {
+      "id": 0,
+      "serviceId": 0,
+      "amount": "0.00001",
+      "asset": "ETH",
+      "rating": 5,
+      "createdAt": 1794701988,
+      "deliveredAt": 1794701993,
+      "status": "completed"
+    }
+  }
 }
