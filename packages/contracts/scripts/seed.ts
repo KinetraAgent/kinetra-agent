@@ -4,6 +4,7 @@ import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { ethers, network } from "hardhat";
+import { nexusSnapshot } from "./snapshot";
 
 // Publishes the CLI tarball checksum and registers the built-in tools.
 const REPO = "https://github.com/KinetraAgent/kinetra-agent";
@@ -163,50 +164,7 @@ async function seedNexus(deployment: any, sha256: (d: string | Buffer) => string
     await (await market.updateService(s.id, s.price, false)).wait();
   }
 
-  // snapshot for the site, in the shape apps/web/src/lib/chain.ts reads live
-  const agentList = await agents.agents(0, 100);
-  const byAccount = new Map(agentList.map((a: any) => [a.account, a]));
-  const services = (await market.services(0, 100)).map((s: any, id: number) => {
-    const a: any = byAccount.get(s.provider);
-    return {
-      id,
-      title: s.title,
-      details: s.details,
-      provider: a?.name ?? "agent",
-      rating: a && a.ratingCount ? Math.round((Number(a.ratingSum) / Number(a.ratingCount)) * 10) / 10 : null,
-      price: ethers.formatEther(s.price),
-      asset: s.asset === ethers.ZeroAddress ? "ETH" : s.asset.toLowerCase() === kntr?.toLowerCase() ? "KNTR" : "token",
-      active: s.active,
-      jobs: Number(s.jobs),
-    };
-  });
-  let lastJob = null;
-  for (let id = Number(await market.jobCount()) - 1; id >= 0 && !lastJob; id--) {
-    const j = await market.job(id);
-    if (j.status !== 3n) continue;
-    lastJob = {
-      id,
-      serviceId: Number(j.serviceId),
-      amount: ethers.formatEther(j.amount),
-      asset: j.asset === ethers.ZeroAddress ? "ETH" : "KNTR",
-      rating: Number(j.rating),
-      createdAt: Number(j.createdAt),
-      deliveredAt: Number(j.deliveredAt),
-      status: "completed",
-    };
-  }
-  deployment.nexus = {
-    stats: {
-      agents: Number(await agents.agentCount()),
-      services: services.length,
-      jobs: Number(await market.jobCount()),
-      completed: Number(await market.completedJobs()),
-      wallets: Number(await factory.walletCount()),
-      volumeEth: ethers.formatEther(await market.volume(ethers.ZeroAddress)),
-    },
-    services,
-    lastJob,
-  };
+  deployment.nexus = await nexusSnapshot(deployment);
 }
 
 main().catch((e) => {

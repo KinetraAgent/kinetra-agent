@@ -12,3 +12,6 @@ packages/contracts/cache/
 packages/contracts/typechain-types/
 packages/contracts/.openzeppelin/unknown-31337.json
 packages/contracts/deployments/preview.json
+
+# KINETRA Cloud worker keys, written by scripts/cloud-agent.ts
+deploy/cloud/*.env

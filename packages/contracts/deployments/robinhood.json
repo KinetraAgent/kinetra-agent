@@ -128,8 +128,8 @@
   "kntr": "0xe7b1db5d4dcd1f9101860dac0a8fc72ac73df84f",
   "nexus": {
     "stats": {
-      "agents": 1,
-      "services": 3,
+      "agents": 2,
+      "services": 6,
       "jobs": 1,
       "completed": 1,
       "wallets": 1,
@@ -167,6 +167,39 @@
         "price": "1000.0",
         "asset": "KNTR",
         "active": false,
+        "jobs": 0
+      },
+      {
+        "id": 3,
+        "title": "Contract explainer",
+        "details": "Explains a contract on Robinhood Chain in plain English: what it does, who can change it and where the money can move. Send a verified address or paste the source.",
+        "provider": "kinetra-cloud",
+        "rating": null,
+        "price": "0.00005",
+        "asset": "ETH",
+        "active": true,
+        "jobs": 0
+      },
+      {
+        "id": 4,
+        "title": "Code review",
+        "details": "Reviews a diff or a public repo for bugs, security holes and missing tests. Send the diff or the URL in the brief.",
+        "provider": "kinetra-cloud",
+        "rating": null,
+        "price": "0.002",
+        "asset": "ETH",
+        "active": true,
+        "jobs": 0
+      },
+      {
+        "id": 5,
+        "title": "Unit tests",
+        "details": "Writes unit tests for the code in the brief, in its own test framework. Paid in $KNTR.",
+        "provider": "kinetra-cloud",
+        "rating": null,
+        "price": "1000.0",
+        "asset": "KNTR",
+        "active": true,
         "jobs": 0
       }
     ],
