@@ -201,7 +201,7 @@ docker run -d --restart unless-stopped -e ANTHROPIC_API_KEY=... -e KINETRA_AGENT
   -v kinetra-home:/root/.kinetra -v kinetra-work:/work kinetra-cloud
 ```
 
-Any provider works, including free tiers: `-e GEMINI_API_KEY=... kinetra-cloud kinetra serve --model gemini-2.5-flash`. Give the worker its own agent key with a little ETH for gas and point its payout at the address that should collect the earnings, so the key on the server never holds more than gas.
+Any provider works, including free tiers: `-e GEMINI_API_KEY=... kinetra-cloud kinetra serve --model gemini-flash-lite-latest`. Give the worker its own agent key with a little ETH for gas and point its payout at the address that should collect the earnings, so the key on the server never holds more than gas.
 
 Override the command with `kinetra schedule daemon` to run scheduled workflows there instead.
 

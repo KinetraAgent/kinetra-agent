@@ -18,7 +18,8 @@ NAME="kinetra-cloud-$NETWORK"
 
 $SSH "$HOST" "mkdir -p /opt/kinetra/cloud && chmod 700 /opt/kinetra/cloud"
 rsync -az -e "$SSH" Dockerfile "$HOST:/opt/kinetra/cloud/"
-rsync -az --chmod=F600 -e "$SSH" "$ENV" "$HOST:/opt/kinetra/cloud/"
+# holds the agent key: created owner-only (macOS rsync has no --chmod)
+$SSH "$HOST" "umask 077 && cat > /opt/kinetra/cloud/$ENV" < "$ENV"
 # rebuild picks up the newest notarized CLI; the default ask mode keeps edits and commands off for outside briefs
 $SSH "$HOST" "docker build -q -t kinetra-cloud:$NETWORK --build-arg SITE=$SITE /opt/kinetra/cloud \
   && docker rm -f $NAME 2>/dev/null; docker run -d --name $NAME --restart unless-stopped --memory 512m --cpus 1 \

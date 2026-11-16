@@ -22,7 +22,7 @@ function agentKey(): string {
   const key = ethers.Wallet.createRandom().privateKey;
   writeFileSync(
     ENV,
-    `KINETRA_AGENT_KEY=${key}\n# model for the worker; free tier: https://aistudio.google.com/apikey\nGEMINI_API_KEY=\nSERVE_ARGS=--provider gemini --model gemini-2.5-flash\n`,
+    `KINETRA_AGENT_KEY=${key}\n# model for the worker; free tier: https://aistudio.google.com/apikey\nGEMINI_API_KEY=\nSERVE_ARGS=--provider gemini --model gemini-flash-lite-latest\n`,
     { mode: 0o600 },
   );
   chmodSync(ENV, 0o600);
