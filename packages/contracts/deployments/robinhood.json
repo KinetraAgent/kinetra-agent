@@ -40,88 +40,88 @@
     }
   },
   "release": {
-    "version": "3.0.0",
-    "checksum": "0x2e1496a0c3d97cb5a3c3151c6908ba37adafc050cb8a0f37f5e7c685c74e80f6",
-    "uri": "https://github.com/KinetraAgent/kinetra-agent/releases/download/v3.0.0/kinetra-cli-3.0.0.tgz",
-    "publishedAt": 1794702175
+    "version": "3.0.1",
+    "checksum": "0x1f32869b7f9f59080b492f4e59f3506a1bb5bb070ee57e4aca94f72bb5f8a949",
+    "uri": "https://github.com/KinetraAgent/kinetra-agent/releases/download/v3.0.1/kinetra-cli-3.0.1.tgz",
+    "publishedAt": 1794853039
   },
   "tools": [
     {
       "name": "read_file",
       "manifestURI": "https://kinetraagent.tech/tools/read_file.json",
-      "manifestHash": "0xf1bdd80991f283f1b1356a8110b7d827ec7a148ba744cca64eaba6326c822b44",
+      "manifestHash": "0xe72ab69b23d8f4a2c158d891d916527a9df46f3e776fbd26a5f8b7958bb50345",
       "verified": true
     },
     {
       "name": "write_file",
       "manifestURI": "https://kinetraagent.tech/tools/write_file.json",
-      "manifestHash": "0x910f617ec91a3e6e4a3076e8dada20ca3fc21fab902446e7105d22cac94e14c8",
+      "manifestHash": "0x5edf133be288306946177b8902f472ed3ef3e5aa5f9fd8d333622dae2daebb92",
       "verified": true
     },
     {
       "name": "edit_file",
       "manifestURI": "https://kinetraagent.tech/tools/edit_file.json",
-      "manifestHash": "0xc4180fef0648b626372d5d62568d3a2ccd824b6ff1be089c8303402c5612dcdb",
+      "manifestHash": "0xedbec2fd1dbdefb08857937a1db230b4854c5a6f67ebc3a873de1057102ab7ef",
       "verified": true
     },
     {
       "name": "list_dir",
       "manifestURI": "https://kinetraagent.tech/tools/list_dir.json",
-      "manifestHash": "0xe010c9c19927341fb5bed77bc40ac1d07511075c54418a489da889b588aee42d",
+      "manifestHash": "0x30684eb5a1045adc650b3c08f1a466d2258975f8797e5fbf404cef1e99aceaa5",
       "verified": true
     },
     {
       "name": "search_files",
       "manifestURI": "https://kinetraagent.tech/tools/search_files.json",
-      "manifestHash": "0x9e12b661138eee20cce6f5303967ae8134afcb14e0f353f3b8847298aad3e8e1",
+      "manifestHash": "0xbdf3d0fe378e8316557248ca783459daa949e84cce8419d5d69827a2d65b88b4",
       "verified": true
     },
     {
       "name": "run_command",
       "manifestURI": "https://kinetraagent.tech/tools/run_command.json",
-      "manifestHash": "0x2f5b9c9a96d6ae376fcd05af53208ca3e3e8dbbc387da26d90cebe39a2d60abf",
+      "manifestHash": "0x1e5bcb1308b210ac0eb9d6bd0eb2894534d3b63b33dfffb57fa935b4b804f617",
       "verified": true
     },
     {
       "name": "git_diff",
       "manifestURI": "https://kinetraagent.tech/tools/git_diff.json",
-      "manifestHash": "0x9459ea96b3aee50949a4bb076c1cff71e0431b59f0c5d6d4f2becd95a86f8101",
+      "manifestHash": "0x79c8839eed7cbade6a969ae08558df64246add5557153db09bbcf56a70af941d",
       "verified": true
     },
     {
       "name": "remember",
       "manifestURI": "https://kinetraagent.tech/tools/remember.json",
-      "manifestHash": "0x856e16c1f3e0ad03cf83682f4651ce7a935ecb3d238ebc10f492eb079673f4d3",
+      "manifestHash": "0x5bfa0300d1a77014f02da70737a3191ec4d7325ba804071f9817f290fd3c99bd",
       "verified": true
     },
     {
       "name": "recall",
       "manifestURI": "https://kinetraagent.tech/tools/recall.json",
-      "manifestHash": "0x05a1280fb0554da8dae382a731effa95addc295ba94c6045e3bfe95d2e355819",
+      "manifestHash": "0xeb57ce9a40ad4b10ad61eb719f6ccbf71b40bf7206309ea58ff6bda4e542a33e",
       "verified": true
     },
     {
       "name": "fetch_url",
       "manifestURI": "https://kinetraagent.tech/tools/fetch_url.json",
-      "manifestHash": "0x2f7d15748e9401b22df0fe21143beb453ae5dd8c1057a195fe026ead849dc0d7",
+      "manifestHash": "0x13f7e7ae91230f5b4f3832277c56a353d9deb218c84ab220e74db9c0707a3f0c",
       "verified": true
     },
     {
       "name": "github",
       "manifestURI": "https://kinetraagent.tech/tools/github.json",
-      "manifestHash": "0x9868e688d05717d6c7377ea49c6f9dd58665be050a18d84b408dd403b7bd9b03",
+      "manifestHash": "0x4fefe959194c50fb5f5e56e92126af54d30774155ef034128f3c2a387357413e",
       "verified": true
     },
     {
       "name": "delegate",
       "manifestURI": "https://kinetraagent.tech/tools/delegate.json",
-      "manifestHash": "0x93bcd816ea7883886ca76046b03ce1fd27ef06a4b3486240451d38736d6d0234",
+      "manifestHash": "0xd249112faf56e5606e5d553e9ac69085040adbb6e9b0052b5cf698f11cdfed15",
       "verified": true
     },
     {
       "name": "nexus",
       "manifestURI": "https://kinetraagent.tech/tools/nexus.json",
-      "manifestHash": "0xc74c0e230ed4190b0deccfe33baab8e4f65cf1a7f8de58cf2c22d56c11ba7cc7",
+      "manifestHash": "0x024ddd439434d563ffc571e259a1099482877b3d4144c9bfd16dbc50c396ff07",
       "verified": true
     }
   ],
@@ -130,7 +130,7 @@
     "stats": {
       "agents": 2,
       "services": 6,
-      "jobs": 1,
+      "jobs": 3,
       "completed": 1,
       "wallets": 1,
       "volumeEth": "0.00001"
@@ -178,7 +178,7 @@
         "price": "0.00005",
         "asset": "ETH",
         "active": true,
-        "jobs": 0
+        "jobs": 2
       },
       {
         "id": 4,
