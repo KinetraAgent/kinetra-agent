@@ -7,7 +7,7 @@ import { test } from "node:test";
 process.env.KINETRA_HOME = mkdtempSync(path.join(tmpdir(), "kinetra-home-"));
 
 const { applyEdit, diffPreview, globToRegExp, isReadOnlyCommand, resolveInside, BUILTIN_TOOLS } = await import("../src/tools.ts");
-const { readSSE, toAnthropic, resolveProvider } = await import("../src/providers.ts");
+const { readSSE, toAnthropic, resolveProvider, complete, RETRY_DELAYS } = await import("../src/providers.ts");
 const { runTurn, trimHistory } = await import("../src/agent.ts");
 
 test("paths cannot leave the project", () => {
@@ -138,4 +138,39 @@ test("agent loop: tool call needs approval, runs, then answers", async () => {
   assert.equal(text, "done");
   assert.equal(sent[1].messages.at(-1).role, "tool");
   assert.equal(state.session.messages.length, 4);
+});
+
+test("OpenAI-compatible calls retry overloaded and rate-limited responses", async () => {
+  const statuses = [503, 429, 200];
+  const seen: number[] = [];
+  const realFetch = globalThis.fetch;
+  globalThis.fetch = (async () => {
+    const status = statuses.shift()!;
+    seen.push(status);
+    if (status !== 200) return new Response("busy", { status });
+    return new Response('data: {"choices":[{"delta":{"content":"ok"},"finish_reason":"stop"}]}\n\ndata: [DONE]\n\n');
+  }) as typeof fetch;
+  RETRY_DELAYS.splice(0, RETRY_DELAYS.length, 1, 1, 1);
+  try {
+    const reply = await complete(
+      { name: "test", kind: "openai", model: "m", baseUrl: "http://model.test" },
+      { system: "", messages: [{ role: "user", content: "hi" }], tools: [], onText: () => {} },
+    );
+    assert.equal(reply.text, "ok");
+    assert.deepEqual(seen, [503, 429, 200]);
+  } finally {
+    globalThis.fetch = realFetch;
+  }
+});
+
+test("Gemini thought signatures ride along with their tool calls", async () => {
+  const sig = { google: { thought_signature: "abc" } };
+  const body = new Response(
+    `data: ${JSON.stringify({ choices: [{ delta: { tool_calls: [{ index: 0, id: "c1", extra_content: sig, function: { name: "read_file", arguments: "{}" } }] }, finish_reason: "tool_calls" }] })}\n\n`,
+  ).body!;
+  const reply = await readSSE(body, () => {});
+  assert.deepEqual(reply.calls[0].extra, sig);
+  const { toOpenAI } = await import("../src/providers.ts");
+  const [msg] = toOpenAI([{ role: "assistant", content: "", calls: reply.calls }]) as any[];
+  assert.deepEqual(msg.tool_calls[0].extra_content, sig);
 });

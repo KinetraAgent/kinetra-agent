@@ -1,3 +1,4 @@
+import { setTimeout as sleep } from "node:timers/promises";
 import Anthropic from "@anthropic-ai/sdk";
 import type { Config } from "./store.ts";
 import type { Tool } from "./tools.ts";
@@ -7,6 +8,8 @@ export interface ToolCall {
   name: string;
   /** raw JSON arguments as the model produced them */
   args: string;
+  /** provider data that must come back with the call, e.g. Gemini's thought_signature */
+  extra?: unknown;
 }
 
 export type Msg =
@@ -165,28 +168,45 @@ export function toOpenAI(messages: Msg[]) {
             role: "assistant",
             content: m.content || null,
             ...(m.calls?.length
-              ? { tool_calls: m.calls.map((c) => ({ id: c.id, type: "function", function: { name: c.name, arguments: c.args || "{}" } })) }
+              ? {
+                  tool_calls: m.calls.map((c) => ({
+                    id: c.id,
+                    type: "function",
+                    function: { name: c.name, arguments: c.args || "{}" },
+                    ...(c.extra ? { extra_content: c.extra } : {}),
+                  })),
+                }
               : {}),
           }
         : { role: "tool", tool_call_id: m.callId, content: m.content },
   );
 }
 
+// overloaded or rate limited, worth another try; the Anthropic SDK retries these on its own
+const TRANSIENT = new Set([408, 429, 500, 502, 503, 504]);
+export const RETRY_DELAYS = [2000, 6000, 18_000];
+
 async function openai(p: Provider, req: CompleteRequest): Promise<Reply> {
-  const res = await fetch(`${p.baseUrl}/chat/completions`, {
-    method: "POST",
-    signal: req.signal,
-    headers: { "content-type": "application/json", ...(p.apiKey ? { authorization: `Bearer ${p.apiKey}` } : {}) },
-    body: JSON.stringify({
-      model: p.model,
-      stream: true,
-      stream_options: { include_usage: true },
-      messages: [{ role: "system", content: req.system }, ...toOpenAI(req.messages)],
-      tools: req.tools.map((t) => ({ type: "function", function: { name: t.name, description: t.description, parameters: t.parameters } })),
-    }),
+  const body = JSON.stringify({
+    model: p.model,
+    stream: true,
+    stream_options: { include_usage: true },
+    messages: [{ role: "system", content: req.system }, ...toOpenAI(req.messages)],
+    tools: req.tools.map((t) => ({ type: "function", function: { name: t.name, description: t.description, parameters: t.parameters } })),
   });
-  if (!res.ok || !res.body) throw new Error(`${p.name} ${res.status}: ${(await res.text()).slice(0, 500)}`);
-  return readSSE(res.body, req.onText);
+  for (let attempt = 0; ; attempt++) {
+    const res = await fetch(`${p.baseUrl}/chat/completions`, {
+      method: "POST",
+      signal: req.signal,
+      headers: { "content-type": "application/json", ...(p.apiKey ? { authorization: `Bearer ${p.apiKey}` } : {}) },
+      body,
+    });
+    if (res.ok && res.body) return readSSE(res.body, req.onText);
+    const error = `${p.name} ${res.status}: ${(await res.text()).slice(0, 500)}`;
+    if (!TRANSIENT.has(res.status) || attempt >= RETRY_DELAYS.length) throw new Error(error);
+    const after = Number(res.headers.get("retry-after")) * 1000;
+    await sleep(Math.min(after || RETRY_DELAYS[attempt], 30_000), undefined, { signal: req.signal });
+  }
 }
 
 /** Folds an OpenAI chat-completions SSE stream into one reply. */
@@ -219,6 +239,8 @@ export async function readSSE(body: ReadableStream<Uint8Array>, onText: (d: stri
         if (tc.id) call.id = tc.id;
         if (tc.function?.name) call.name ||= tc.function.name;
         if (tc.function?.arguments) call.args += tc.function.arguments;
+        // Gemini 3 rejects the next turn unless its thought_signature is echoed back
+        if (tc.extra_content) call.extra = tc.extra_content;
       }
       if (choice.finish_reason) finish = choice.finish_reason;
     }
