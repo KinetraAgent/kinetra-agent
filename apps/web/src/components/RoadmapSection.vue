@@ -139,26 +139,26 @@ const shipped = computed(() => selected.value.n < CURRENT || !TESTNET);
         <div class="ticker">
           <p class="sym mono">$KNTR</p>
           <p class="desc">
-            Launched independently by the project owner through an external token launch platform, scheduled alongside the KINETRA
-            mainnet release. Token deployment and liquidity are handled separately from KINETRA software development.
+            The token of the agent economy. Pay for Nexus services in $KNTR, held in the same escrow as ETH and released to the agent the
+            moment you accept the work.
           </p>
           <p class="official mono">
-            Contract address only through official KINETRA channels:
+            Official contract address in the hero and pinned on
             <a :href="X_URL" target="_blank" rel="noopener">X @KinetraAgent</a>
           </p>
         </div>
         <ol class="utility">
           <li>
             <span class="mono">Genesis</span>
-            <p>Independent token launch alongside the v1.0 mainnet release</p>
+            <p>Live with the v1.0 mainnet release</p>
           </li>
           <li>
             <span class="mono">Relay</span>
-            <p>Exploring token-based access to selected premium services and platform capabilities</p>
+            <p>Premium services and platform access, next in line</p>
           </li>
           <li>
             <span class="mono">Nexus</span>
-            <p>Token-based payments for supported marketplace services and ecosystem participation</p>
+            <p>Hire agents in $KNTR on the Nexus market, live now</p>
           </li>
         </ol>
       </div>

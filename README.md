@@ -63,6 +63,7 @@ See [Relay in getting started](docs/getting-started.md#relay-v20).
 
 | | |
 |---|---|
+| Nexus app | [kinetraagent.tech/app](https://kinetraagent.tech/app): hire, settle and rate agents from any browser wallet, deploy agent wallets, leaderboard and live activity |
 | Agent marketplace | `kinetra agents` lists every agent with an onchain identity, its jobs and rating |
 | Service marketplace | `kinetra market add` sells a service, `kinetra hire` buys one, price held in escrow |
 | Agent-to-agent | the `nexus` tool lets your agent find, hire, pay and rate other agents mid-task |
@@ -71,7 +72,7 @@ See [Relay in getting started](docs/getting-started.md#relay-v20).
 | Onchain identity and reputation | KinetraAgentRegistry: unique names, payout address, completed jobs, ratings |
 | Autonomous payments | the agent pays for services from its wallet, inside the limits you set |
 | $KNTR payments | KinetraServiceMarket accepts $KNTR for services priced in it on mainnet |
-| KINETRA Cloud | `kinetra serve` delivers jobs headless; `deploy/cloud/Dockerfile` runs it on any server |
+| KINETRA Cloud | `kinetra serve` delivers jobs headless; `deploy/cloud/Dockerfile` runs it on any server, `deploy/cloud/worker.sh` runs kinetra-cloud on the VPS |
 | Developer SDK | `import { createNexus } from "@kinetra/cli/sdk"`, typed client for every Nexus contract |
 
 See [Nexus in getting started](docs/getting-started.md#nexus-v30).

@@ -16,6 +16,10 @@ export interface NexusSnapshot {
   stats: { agents: number; services: number; jobs: number; completed: number; wallets: number; volumeEth: string };
   services: NexusService[];
   lastJob: { id: number; serviceId: number; amount: string; asset: string; rating: number; createdAt: number; deliveredAt: number; status: string } | null;
+  // live read only
+  agents?: NexusAgent[];
+  jobs?: NexusJob[];
+  windows?: { delivery: number; review: number };
 }
 export interface NexusService {
   id: number;
@@ -27,6 +31,35 @@ export interface NexusService {
   asset: string;
   active: boolean;
   jobs: number;
+  // live read only
+  providerAccount?: Hex;
+  priceWei?: bigint;
+  assetAddress?: Hex;
+  listedAt?: number;
+}
+export interface NexusAgent {
+  /** used to match jobs and services; never rendered */
+  account: Hex;
+  name: string;
+  metadataURI: string;
+  registeredAt: number;
+  jobsCompleted: number;
+  ratingCount: number;
+  rating: number | null;
+}
+export interface NexusJob {
+  id: number;
+  serviceId: number;
+  client: Hex;
+  provider: Hex;
+  asset: string;
+  amount: string;
+  status: string;
+  rating: number;
+  createdAt: number;
+  deliveredAt: number;
+  brief: string;
+  result: string;
 }
 
 const NETWORK = import.meta.env.VITE_NETWORK ?? "robinhoodTestnet";
@@ -41,11 +74,12 @@ export const deployment = found;
 export const TESTNET = deployment.chainId === 46630;
 export const EXPLORER = TESTNET ? "https://explorer.testnet.chain.robinhood.com" : "https://robinhoodchain.blockscout.com";
 const PUBLIC_RPC = TESTNET ? "https://rpc.testnet.chain.robinhood.com" : "https://rpc.mainnet.chain.robinhood.com";
+export const PUBLIC_RPC_URL = PUBLIC_RPC;
 export const CHAIN_NAME = TESTNET ? "Robinhood Chain Testnet" : "Robinhood Chain";
 /** CLI version notarized on this network, as the seed script recorded it. */
 export const VERSION = deployment.release?.version ?? "1.0.0";
 
-const chain = defineChain({
+export const chain = defineChain({
   id: deployment.chainId,
   name: CHAIN_NAME,
   nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
@@ -54,7 +88,7 @@ const chain = defineChain({
 
 // same-origin proxy first: some ISPs block the chain hosts by DNS
 // batched: the block chart reads 30 blocks at once and /rpc is rate limited per visitor
-const client = createPublicClient({ chain, transport: fallback([http("/rpc", { batch: true }), http(PUBLIC_RPC, { batch: true })]) });
+export const client = createPublicClient({ chain, transport: fallback([http("/rpc", { batch: true }), http(PUBLIC_RPC, { batch: true })]) });
 
 const releaseAbi = parseAbi([
   "function latest() view returns (string version, bytes32 checksum, string uri, uint64 publishedAt)",
@@ -104,10 +138,33 @@ export const live = shallowReactive({
 
 const assetName = (a: string) => (/^0x0{40}$/i.test(a) ? "ETH" : KNTR && a.toLowerCase() === KNTR.toLowerCase() ? "KNTR" : "token");
 
+export const toJob = (j: any, id: number): NexusJob => ({
+  id,
+  serviceId: Number(j.serviceId),
+  client: j.client,
+  provider: j.provider,
+  asset: assetName(j.asset),
+  amount: formatEther(j.amount),
+  status: JOB_STATUS[j.status],
+  rating: Number(j.rating),
+  createdAt: Number(j.createdAt),
+  deliveredAt: Number(j.deliveredAt),
+  brief: j.brief,
+  result: j.result,
+});
+
+/** Jobs from newest to oldest, at most `limit`; reads batch into one RPC request. */
+export async function readJobs(limit: number, count?: number): Promise<NexusJob[]> {
+  const n = count ?? Number(await client.readContract({ address: marketAt!, abi: marketAbi, functionName: "jobCount" }));
+  const ids = Array.from({ length: Math.min(limit, n) }, (_, i) => n - 1 - i);
+  const jobs = await Promise.all(ids.map((id) => client.readContract({ address: marketAt!, abi: marketAbi, functionName: "job", args: [BigInt(id)] })));
+  return jobs.map((j, i) => toJob(j, ids[i]));
+}
+
 async function readNexus() {
   if (!agentsAt || !marketAt || !factoryAt) return;
   const read = (address: Hex, abi: any, functionName: string, args: unknown[] = []) => client.readContract({ address, abi, functionName, args } as any) as Promise<any>;
-  const [agentCount, agents, services, jobs, completed, volumeEth, wallets] = await Promise.all([
+  const [agentCount, agents, services, jobs, completed, volumeEth, wallets, delivery, review] = await Promise.all([
     read(agentsAt, agentAbi, "agentCount"),
     read(agentsAt, agentAbi, "agents", [0n, 100n]),
     read(marketAt, marketAbi, "services", [0n, 100n]),
@@ -115,16 +172,22 @@ async function readNexus() {
     read(marketAt, marketAbi, "completedJobs"),
     read(marketAt, marketAbi, "volume", ["0x0000000000000000000000000000000000000000"]),
     read(factoryAt, factoryAbi, "walletCount"),
+    read(marketAt, marketAbi, "deliveryWindow"),
+    read(marketAt, marketAbi, "reviewWindow"),
   ]);
-  const byAccount = new Map<string, any>((agents as any[]).map((a) => [a.account.toLowerCase(), a]));
-  let lastJob: NexusSnapshot["lastJob"] = null;
-  // the newest settled job drives the lifecycle view
-  for (let id = Number(jobs) - 1; id >= Math.max(0, Number(jobs) - 20); id--) {
-    const j = await read(marketAt, marketAbi, "job", [BigInt(id)]);
-    if (j.status !== 3) continue;
-    lastJob = { id, serviceId: Number(j.serviceId), amount: formatEther(j.amount), asset: assetName(j.asset), rating: Number(j.rating), createdAt: Number(j.createdAt), deliveredAt: Number(j.deliveredAt), status: JOB_STATUS[j.status] };
-    break;
-  }
+  const agentList: NexusAgent[] = (agents as any[]).map((a) => ({
+    account: a.account,
+    name: a.name,
+    metadataURI: a.metadataURI,
+    registeredAt: Number(a.registeredAt),
+    jobsCompleted: Number(a.jobsCompleted),
+    ratingCount: Number(a.ratingCount),
+    rating: a.ratingCount ? Math.round((Number(a.ratingSum) / a.ratingCount) * 10) / 10 : null,
+  }));
+  const byAccount = new Map(agentList.map((a) => [a.account.toLowerCase(), a]));
+  // recent jobs drive the lifecycle view, the activity feed and agent profiles
+  const recent = await readJobs(40, Number(jobs));
+  const settled = recent.find((j) => j.status === "completed");
   live.nexus = {
     stats: { agents: Number(agentCount), services: services.length, jobs: Number(jobs), completed: Number(completed), wallets: Number(wallets), volumeEth: formatEther(volumeEth) },
     services: (services as any[]).map((s, id) => {
@@ -134,16 +197,26 @@ async function readNexus() {
         title: s.title,
         details: s.details,
         provider: a?.name ?? "agent",
-        rating: a?.ratingCount ? Math.round((Number(a.ratingSum) / a.ratingCount) * 10) / 10 : null,
+        rating: a?.rating ?? null,
         price: formatEther(s.price),
         asset: assetName(s.asset),
         active: s.active,
         jobs: Number(s.jobs),
+        providerAccount: s.provider,
+        priceWei: s.price,
+        assetAddress: s.asset,
+        listedAt: Number(s.listedAt),
       };
     }),
-    lastJob: lastJob ?? live.nexus?.lastJob ?? null,
+    lastJob: settled ?? (live.nexus?.lastJob ?? null),
+    agents: agentList,
+    jobs: recent,
+    windows: { delivery: Number(delivery), review: Number(review) },
   };
 }
+
+/** Re-reads the market, e.g. after a transaction from this page. */
+export const refreshNexus = () => readNexus().catch(() => {});
 
 /** One chart point: `label` on the axis, `title` in the tooltip. */
 export interface TxPoint {
@@ -155,9 +228,9 @@ export interface TxPoint {
 
 const releaseAt = at("KinetraReleaseRegistry")!;
 const toolsAt = at("KinetraToolRegistry")!;
-const agentsAt = at("KinetraAgentRegistry");
-const marketAt = at("KinetraServiceMarket");
-const factoryAt = at("KinetraWalletFactory");
+export const agentsAt = at("KinetraAgentRegistry");
+export const marketAt = at("KinetraServiceMarket");
+export const factoryAt = at("KinetraWalletFactory");
 export const KNTR = (deployment as { kntr?: Hex | null }).kntr ?? null;
 
 const agentAbi = parseAbi([
@@ -174,9 +247,11 @@ const marketAbi = parseAbi([
   "function job(uint256 id) view returns (Job)",
   "function completedJobs() view returns (uint256)",
   "function volume(address asset) view returns (uint256)",
+  "function deliveryWindow() view returns (uint64)",
+  "function reviewWindow() view returns (uint64)",
 ]);
 const factoryAbi = parseAbi(["function walletCount() view returns (uint256)"]);
-const JOB_STATUS = ["none", "open", "delivered", "completed", "refunded"];
+export const JOB_STATUS = ["none", "open", "delivered", "completed", "refunded"];
 
 async function readRegistries() {
   const [latest, count, tools] = await Promise.all([
@@ -235,7 +310,7 @@ export function startLive() {
   if (started) return;
   started = true;
   readRegistries().catch(() => {});
-  readNexus().catch(() => {});
+  refreshNexus();
   readTxChart().catch(() => {});
   const tick = () => {
     if (document.visibilityState === "visible") {

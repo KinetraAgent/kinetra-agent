@@ -35,6 +35,8 @@ let h = 0;
 const stars = Array.from({ length: 280 }, () => ({ x: Math.random(), y: Math.random(), z: 0.2 + Math.random() * 0.8, t: Math.random() * 6.3 }));
 
 function size() {
+  // the canvas leaves the DOM once the splash is gone, but this listener outlives it
+  if (!canvas.value) return;
   const dpr = Math.min(devicePixelRatio, 2);
   w = innerWidth;
   h = innerHeight;

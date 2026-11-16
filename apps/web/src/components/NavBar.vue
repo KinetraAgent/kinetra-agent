@@ -2,13 +2,16 @@
 import { ArrowUpRight, Menu, Moon, Sun, X } from "lucide-vue-next";
 import { computed, onBeforeUnmount, onMounted, ref } from "vue";
 import { live } from "../lib/chain";
-import { GITHUB, X_URL } from "../lib/links";
+import { X_URL } from "../lib/links";
 import { introDone, scrollToId } from "../lib/motion";
 import { shuffle } from "../lib/scramble";
 import { theme, toggleTheme } from "../lib/theme";
 import BrandIcon from "./BrandIcon.vue";
 import RollingNumber from "./RollingNumber.vue";
+import WalletButton from "./WalletButton.vue";
 
+const props = defineProps<{ page: string }>();
+const home = props.page === "home";
 const links = [
   { id: "arcade", label: "Execute" },
   { id: "toolkit", label: "Toolkit" },
@@ -58,24 +61,28 @@ const scramble = (e: MouseEvent, text: string) => shuffle((e.currentTarget as HT
 
 function go(id: string) {
   open.value = false;
-  scrollToId(id);
+  if (home) scrollToId(id);
+  else location.href = id === "top" ? "/" : `/#${id}`;
 }
 </script>
 
 <template>
-  <header class="nav" :class="{ scrolled, open, entered }" :data-theme="inStory ? 'dark' : undefined">
+  <header class="nav" :class="{ scrolled, open, entered, solid: !home && scrolled }" :data-theme="inStory ? 'dark' : undefined">
     <div class="progress" :style="{ transform: `scaleX(${progress})` }" aria-hidden="true"></div>
     <div class="wrap bar">
-      <a class="brand chip" href="#top" aria-label="KINETRA home" @click.prevent="go('top')">
+      <a class="brand chip" href="/" aria-label="KINETRA home" @click.prevent="go('top')">
         <img src="/logo-96.webp" width="24" height="24" alt="" />
         <span>KINETRA</span>
       </a>
       <nav class="links" aria-label="Sections">
-        <a v-for="l in links" :key="l.id" :href="`#${l.id}`" :class="{ on: active === l.id }" @click.prevent="go(l.id)" @mouseenter="scramble($event, l.label)">
+        <a v-for="l in links" :key="l.id" :href="`/#${l.id}`" :class="{ on: active === l.id }" @click.prevent="go(l.id)" @mouseenter="scramble($event, l.label)">
           <span class="t">{{ l.label }}</span><ArrowUpRight class="arrow" :size="13" :stroke-width="1.75" aria-hidden="true" />
         </a>
-        <a :href="`${GITHUB}/tree/main/docs`" target="_blank" rel="noopener" @mouseenter="scramble($event, 'Docs')">
+        <a href="/docs" :class="{ on: page === 'docs' }" @mouseenter="scramble($event, 'Docs')">
           <span class="t">Docs</span><ArrowUpRight class="arrow" :size="13" :stroke-width="1.75" aria-hidden="true" />
+        </a>
+        <a href="/app" class="app" :class="{ on: page === 'app' || page === 'agent' }" @mouseenter="scramble($event, 'Nexus app')">
+          <span class="live"></span><span class="t">Nexus app</span><ArrowUpRight class="arrow" :size="13" :stroke-width="1.75" aria-hidden="true" />
         </a>
       </nav>
       <div class="end">
@@ -84,7 +91,8 @@ function go(id: string) {
           <Sun v-if="theme === 'dark'" :size="18" :stroke-width="1.5" />
           <Moon v-else :size="18" :stroke-width="1.5" />
         </button>
-        <button class="install chip mono" type="button" data-cursor="install" @click="go('install')">
+        <WalletButton v-if="!home" />
+        <button v-else class="install chip mono" type="button" data-cursor="install" @click="go('install')">
           Install
           <span class="badge" :title="'Latest block, last three digits'"><RollingNumber :value="tick" /></span>
         </button>
@@ -95,14 +103,26 @@ function go(id: string) {
       </div>
     </div>
     <nav v-if="open" class="sheet wrap" aria-label="Sections">
-      <a v-for="l in links" :key="l.id" :href="`#${l.id}`" @click.prevent="go(l.id)">{{ l.label }}<ArrowUpRight class="arrow" :size="13" :stroke-width="1.75" aria-hidden="true" /></a>
-      <a :href="`${GITHUB}/tree/main/docs`" target="_blank" rel="noopener">Docs<ArrowUpRight class="arrow" :size="13" :stroke-width="1.75" aria-hidden="true" /></a>
+      <a v-for="l in links" :key="l.id" :href="`/#${l.id}`" @click.prevent="go(l.id)">{{ l.label }}<ArrowUpRight class="arrow" :size="13" :stroke-width="1.75" aria-hidden="true" /></a>
+      <a href="/app">Nexus app<ArrowUpRight class="arrow" :size="13" :stroke-width="1.75" aria-hidden="true" /></a>
+      <a href="/docs">Docs<ArrowUpRight class="arrow" :size="13" :stroke-width="1.75" aria-hidden="true" /></a>
       <a :href="X_URL" target="_blank" rel="noopener">X @KinetraAgent<ArrowUpRight class="arrow" :size="13" :stroke-width="1.75" aria-hidden="true" /></a>
     </nav>
   </header>
 </template>
 
 <style scoped>
+.links .app {
+  color: var(--accent);
+}
+.links .app .live {
+  width: 6px;
+  height: 6px;
+  margin-right: 6px;
+  border-radius: 50%;
+  background: var(--pos);
+  box-shadow: 0 0 8px var(--pos);
+}
 .nav {
   position: fixed;
   inset: 0 0 auto;
@@ -118,6 +138,12 @@ function go(id: string) {
 .nav.entered {
   opacity: 1;
   transform: none;
+}
+/* app pages scroll dense content under the bar */
+.nav.solid {
+  background: color-mix(in srgb, var(--bg) 84%, transparent);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--line);
 }
 .nav.open {
   background: color-mix(in srgb, var(--bg) 94%, transparent);

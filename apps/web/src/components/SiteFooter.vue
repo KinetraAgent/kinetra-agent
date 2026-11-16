@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { CHAIN_NAME, EXPLORER, CONTRACTS } from "../lib/chain";
-import { GITHUB, SITE, X_URL } from "../lib/links";
+import { SITE, X_URL } from "../lib/links";
 import { finePointer, reduced } from "../lib/motion";
 
 // The wordmark leans toward the cursor: letters near it grow heavier and wider on the font's own axes.
@@ -32,9 +32,9 @@ function rest() {
       </div>
       <nav aria-label="Project">
         <p class="h mono">project</p>
-        <a :href="GITHUB" target="_blank" rel="noopener">GitHub</a>
-        <a :href="`${GITHUB}/tree/main/docs`" target="_blank" rel="noopener">Docs</a>
-        <a :href="`${GITHUB}/releases`" target="_blank" rel="noopener">Releases</a>
+        <a href="/app">Nexus app</a>
+        <a href="/docs">Docs</a>
+        <a href="/#install">Install</a>
       </nav>
       <nav aria-label="Onchain">
         <p class="h mono">onchain</p>
@@ -44,7 +44,7 @@ function rest() {
       <nav aria-label="Community">
         <p class="h mono">community</p>
         <a :href="X_URL" target="_blank" rel="noopener">X @KinetraAgent</a>
-        <a :href="`${GITHUB}/issues`" target="_blank" rel="noopener">Issues</a>
+        <a href="/app#jobs">Your jobs</a>
       </nav>
     </div>
     <div class="mark" ref="mark" aria-hidden="true" @pointermove="flex" @pointerleave="rest">

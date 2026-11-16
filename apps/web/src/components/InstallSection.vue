@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
 import { live } from "../lib/chain";
-import { GITHUB, INSTALL_SH } from "../lib/links";
-import BrandIcon from "./BrandIcon.vue";
+import { BookOpen } from "lucide-vue-next";
+import { INSTALL_SH } from "../lib/links";
 import InstallCommand from "./InstallCommand.vue";
 
 const tab = ref<"unix" | "npm">("unix");
-const npmCmd = computed(() => `npm install -g ${live.release?.uri ?? `${GITHUB}/releases/latest/download/kinetra-cli.tgz`}`);
+// the tarball URL notarized in KinetraReleaseRegistry, the same one install.sh verifies
+const npmCmd = computed(() => `npm install -g ${live.release?.uri ?? "<tarball URL from KinetraReleaseRegistry.latest()>"}`);
 const STEPS = [
   { cmd: "export ANTHROPIC_API_KEY=sk-ant-…", text: "Connect a model. Any of the eight providers works, or KINETRA asks on first run" },
   { cmd: "kinetra init", text: "Optional. Write the rules for this project into KINETRA.md" },
@@ -21,14 +22,14 @@ const STEPS = [
         <svg class="key" viewBox="0 0 120 170" aria-hidden="true" data-speed="-0.25">
           <path d="M60 6a40 40 0 0 1 22 73.4L96 164H24l14-84.6A40 40 0 0 1 60 6Z" />
         </svg>
-        <p class="kicker mono"><b>05</b> install</p>
+        <p class="kicker mono"><b>06</b> install</p>
         <h2 class="h2">One line to your first <em>execution</em></h2>
         <p class="lede">Needs Node.js 22 or newer. The script verifies the package against Robinhood Chain before it installs.</p>
-        <a class="repo card" :href="GITHUB" target="_blank" rel="noopener">
-          <BrandIcon name="github" />
+        <a class="repo card" href="/docs">
+          <BookOpen :size="20" :stroke-width="1.5" />
           <span>
-            <span class="r">KinetraAgent/kinetra-agent</span>
-            <span class="mono m">MIT · TypeScript · CLI, contracts and site in one repo</span>
+            <span class="r">Read the docs</span>
+            <span class="mono m">getting started · tools · Nexus · contracts</span>
           </span>
         </a>
       </div>

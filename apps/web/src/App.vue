@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, onMounted } from "vue";
+import { computed, defineAsyncComponent, nextTick, onMounted } from "vue";
 import ArcadeSection from "./components/ArcadeSection.vue";
 import CosmosBg from "./components/CosmosBg.vue";
 import CursorFx from "./components/CursorFx.vue";
@@ -14,7 +14,16 @@ import SiteFooter from "./components/SiteFooter.vue";
 import SplashScreen from "./components/SplashScreen.vue";
 import ToolkitSection from "./components/ToolkitSection.vue";
 import { deployment, fmt, live, short, startLive } from "./lib/chain";
-import { initMotion } from "./lib/motion";
+import { initMotion, introDone, scrollToId } from "./lib/motion";
+import { activity, ago } from "./lib/nexus";
+
+// One bundle, a few pages; nginx serves index.html for every path. Pages besides home load on demand.
+const NexusApp = defineAsyncComponent(() => import("./components/NexusApp.vue"));
+const AgentPage = defineAsyncComponent(() => import("./components/AgentPage.vue"));
+const DocsPage = defineAsyncComponent(() => import("./components/DocsPage.vue"));
+const path = location.pathname.replace(/\/+$/, "");
+const page = path === "/app" ? "app" : path.startsWith("/agent/") ? "agent" : path === "/docs" ? "docs" : "home";
+const agentName = page === "agent" ? decodeURIComponent(path.slice("/agent/".length)) : "";
 
 const VERBS = ["From intent", "to execution", "read", "write", "run", "approve"];
 const chain = computed(() => [
@@ -23,22 +32,31 @@ const chain = computed(() => [
   live.release ? `sha256 ${short(live.release.checksum, 6, 4)}` : "sha256",
   `${live.tools.length} tools onchain`,
   live.nexus?.stats.agents ? `${live.nexus.stats.agents} agents on Nexus` : "Nexus v3.0 live",
+  // the latest market events ride the ticker
+  ...activity(4).map((a) => `${a.text} · ${ago(a.at)}`),
   "$KNTR with mainnet",
 ]);
 
 onMounted(async () => {
   startLive();
+  // pages without the splash have nothing to wait for
+  if (page !== "home") introDone.resolve();
   await nextTick();
   initMotion();
+  // links like /#nexus from other pages land on their section once the intro is done
+  if (page === "home" && location.hash) introDone.promise.then(() => setTimeout(() => scrollToId(location.hash.slice(1)), 300));
 });
 </script>
 
 <template>
-  <SplashScreen />
+  <SplashScreen v-if="page === 'home'" />
   <CosmosBg />
   <CursorFx />
-  <NavBar />
-  <main>
+  <NavBar :page="page" />
+  <NexusApp v-if="page === 'app'" />
+  <AgentPage v-else-if="page === 'agent'" :name="agentName" />
+  <DocsPage v-else-if="page === 'docs'" />
+  <main v-else>
     <HeroSection />
     <!-- the story ends in black; this fades it into the page -->
     <div class="seam">

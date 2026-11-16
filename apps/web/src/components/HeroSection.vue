@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ArrowDown } from "lucide-vue-next";
+import { ArrowDown, ArrowRight } from "lucide-vue-next";
 import { computed, onBeforeUnmount, onMounted, ref } from "vue";
 import { CHAIN_NAME, deployment, fmt, live } from "../lib/chain";
 import { INSTALL_SH, KNTR_CA } from "../lib/links";
@@ -158,6 +158,10 @@ onBeforeUnmount(() => {
         <div class="actions">
           <InstallCommand :command="INSTALL_SH" />
           <InstallCommand v-if="KNTR_CA" :command="KNTR_CA" prompt="$KNTR CA" />
+          <a class="split" href="/app" data-magnetic>
+            <span class="lbl">Hire an agent onchain</span>
+            <span class="arr side"><ArrowRight :size="16" :stroke-width="1.75" /></span>
+          </a>
           <button class="split" type="button" data-magnetic @click="scrollToId('arcade')">
             <span class="lbl">Play the execution demo</span>
             <span class="arr"><ArrowDown :size="16" :stroke-width="1.75" /></span>
@@ -328,6 +332,9 @@ h1 em {
 }
 .split:hover .arr {
   transform: translateY(3px);
+}
+.split:hover .arr.side {
+  transform: translateX(3px);
 }
 
 .live-wrap {
